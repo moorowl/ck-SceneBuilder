@@ -1,23 +1,23 @@
 ﻿using System;
+using UnityEngine;
 
 namespace SceneBuilder.Utilities.DataStructures {
 	public readonly struct Identifier : IEquatable<Identifier> {
 		public readonly string Namespace;
 		public readonly string Path;
-
 		public readonly string AsSceneName;
+
+		private readonly string _asString;
 		
 		public Identifier(string ns, string path) {
 			Namespace = ns;
 			Path = path;
-
-			AsSceneName = $"{Namespace}:{Path}";
-			if (AsSceneName.Length > 28)
-				AsSceneName = AsSceneName.Substring(0, 28);
+			_asString = $"{Namespace}:{Path}";
+			AsSceneName = $"SB/{Animator.StringToHash(_asString)}";
 		}
 
 		public override string ToString() {
-			return $"{Namespace}:{Path}";
+			return _asString;
 		}
 		
 		public bool Equals(Identifier other) {

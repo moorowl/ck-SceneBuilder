@@ -1,7 +1,7 @@
-﻿using Unity.Collections;
+﻿using SceneBuilder.Utilities.DataStructures;
+using Unity.Collections;
 using Unity.Mathematics;
 using Unity.NetCode;
-using UnityEngine;
 using EntityArchetype = Unity.Entities.EntityArchetype;
 using WorldSystemFilterFlags = Unity.Entities.WorldSystemFilterFlags;
 
@@ -9,21 +9,31 @@ namespace SceneBuilder.Commands {
 	[Unity.Entities.UpdateInGroup(typeof(RunSimulationSystemGroup))]
 	[Unity.Entities.WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation)]
 	public partial class ClientCommandSystem : PugSimulationSystemBase {
-		private NativeQueue<SceneDebugRpc> _rpcQueue;
+		private NativeQueue<StructureRpc> _rpcQueue;
 		private EntityArchetype _rpcArchetype;
 
 		protected override void OnCreate() {
 			UpdatesInRunGroup();
-			_rpcQueue = new NativeQueue<SceneDebugRpc>(Allocator.Persistent);
-			_rpcArchetype = EntityManager.CreateArchetype(typeof(SceneDebugRpc), typeof(SendRpcCommandRequest));
+			_rpcQueue = new NativeQueue<StructureRpc>(Allocator.Persistent);
+			_rpcArchetype = EntityManager.CreateArchetype(typeof(StructureRpc), typeof(SendRpcCommandRequest));
 
 			base.OnCreate();
 		}
 		
-		public void SpawnScene(string name, int2 position) {
-			_rpcQueue.Enqueue(new SceneDebugRpc {
-				SceneName = new FixedString32Bytes(name),
-				Position = position
+		public void SpawnScene(Identifier id, int2 position, uint seed = 0) {
+			_rpcQueue.Enqueue(new StructureRpc {
+				Name = id.AsSceneName,
+				Position = position,
+				PlaceInstead = true,
+				Seed = seed
+			});
+		}
+
+		public void SaveStructure(string name, int2 position, int2 size) {
+			_rpcQueue.Enqueue(new StructureRpc {
+				Name = new FixedString64Bytes(name),
+				Position = position,
+				Size = size
 			});
 		}
 		
