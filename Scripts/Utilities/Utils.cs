@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Text.RegularExpressions;
 using PugMod;
 using SceneBuilder.Utilities.DataStructures;
 using UnityEngine;
@@ -20,17 +21,39 @@ namespace SceneBuilder.Utilities {
 			//var text = PugText.ProcessText("CameraMode:SavedCapture", new[] { name }, true, false);
 			API.Reflection.Invoke(MiRenderText, Manager.ui.chatWindow, message);
 		}
-		
-		public static void LoadFilesFromBundles(string type, Action<Identifier, byte[]> callback) {
-			var paths = API.ConfigFilesystem.GetFiles(Main.InternalName);
 
-			foreach (var path in paths) {
-				var parts = path.Split("/");
-				if (parts.Length < 5 || parts[1] != "Data" || parts[3] != type)
+		private static readonly Regex LocalFilesRegex = new(@$"^{Main.InternalName}\/Content\/([^\/]+)\/([^\/]+)\/(.*)\.json$");
+		private static readonly Regex ModFilesRegex = new(@$"^(?:.*)\/Resources\/{Main.InternalName}\/Content\/([^\/]+)\/([^\/]+)\/(.*)\.json$");
+		
+		public static void LoadFilesFromBundles(string dataType, Action<Identifier, byte[]> callback) {
+			// Load from local files
+			foreach (var path in API.ConfigFilesystem.GetFiles(Main.InternalName)) {
+				var match = LocalFilesRegex.Match(path);
+				if (!match.Success || match.Groups.Count < 3)
 					continue;
 				
-				var identifier = new Identifier(parts[2], string.Join("/", parts[4..]).Replace(".json", string.Empty));
+				if (match.Groups[2].Value != dataType)
+					continue;
+						
+				var identifier = new Identifier(match.Groups[1].Value, match.Groups[3].Value);
 				callback(identifier, API.ConfigFilesystem.Read(path));
+			}
+			
+			// Load from mods
+			foreach (var mod in API.ModLoader.LoadedMods) {
+				foreach (var bundle in mod.AssetBundles) {
+					foreach (var assetName in bundle.GetAllAssetNames()) {
+						var match = ModFilesRegex.Match(assetName);
+						if (!match.Success || match.Groups.Count < 3)
+							continue;
+						
+						if (match.Groups[2].Value != dataType)
+							continue;
+						
+						var identifier = new Identifier(match.Groups[1].Value, match.Groups[3].Value);
+						callback(identifier, bundle.LoadAsset<TextAsset>(assetName).bytes);
+					}
+				}
 			}
 		}
 		
