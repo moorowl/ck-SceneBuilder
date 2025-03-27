@@ -19,6 +19,16 @@ namespace SceneBuilder.Scenes {
 			Utils.LoadFilesFromBundles("Scenes", (id, data) => {
 				try {
 					var file = JsonConvert.DeserializeObject<SceneFile>(Encoding.UTF8.GetString(data));
+					if (!StructureLoader.Instance.TryGetStructure(file.Structure, out _)) {
+						Utils.Log($"- {id} (skip, missing or unknown structure)");
+						return;
+					}
+					
+					if (file.Generation == null) {
+						Utils.Log($"- {id} (skip, missing generation settings)");
+						return;
+					}
+					
 					if (_loadedScenes.TryAdd(id, file)) {
 						_runtimeSceneNameMap[id.AsSceneName] = id;
 						Utils.Log($"- {id} (ok)");
@@ -34,16 +44,9 @@ namespace SceneBuilder.Scenes {
 			Utils.Log("Injecting scenes...");
 			var serverCustomScenesTable = Manager.ecs.serverAuthoringPrefab.GetComponentInChildren<CustomSceneAuthoring>().CustomScenesDataTable;
 			foreach (var (id, sceneFile) in _loadedScenes) {
-				if (!StructureLoader.Instance.TryGetStructure(sceneFile.Structure, out var structureFile)) {
-					Utils.Log($"- {id} (skip, missing or invalid structure name)");
+				if (!StructureLoader.Instance.TryGetStructure(sceneFile.Structure, out var structureFile))
 					continue;
-				}
-
-				if (sceneFile.Generation == null) {
-					Utils.Log($"- {id} (skip, missing generation settings)");
-					continue;
-				}
-
+				
 				var scene = sceneFile.ConvertToDataTableScene(id, structureFile);
 				if (scene != null) {
 					Utils.Log($"- {id} (ok)");
