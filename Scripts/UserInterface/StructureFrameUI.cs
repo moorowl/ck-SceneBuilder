@@ -49,11 +49,11 @@ namespace SceneBuilder.UserInterface {
 				frame.size = new Vector2(0f, 0f);
 			}
 
-			UpdatePin(PinA, PinB, pinA);
-			UpdatePin(PinB, PinA, pinB);
+			UpdatePin(true, PinA, PinB, pinA);
+			UpdatePin(false, PinB, PinA, pinB);
 		}
 
-		private void UpdatePin(int2? tilePosition, int2? otherTilePosition, SpriteRenderer sr) {
+		private void UpdatePin(bool isPinA, int2? tilePosition, int2? otherTilePosition, SpriteRenderer sr) {
 			if (tilePosition.HasValue) {
 				var position = tilePosition.Value.ToFloat2() + 0.5f;
 
@@ -61,11 +61,11 @@ namespace SceneBuilder.UserInterface {
 					var otherPosition = otherTilePosition.Value.ToFloat2() + 0.5f;
 					var direction = new int2(1, 1);
 
-					if (otherPosition.x > position.x)
+					if (otherPosition.x > position.x || (isPinA && otherPosition.x >= position.x))
 						direction.x = -1;
-					if (otherPosition.y > position.y)
+					if (otherPosition.y > position.y || (isPinA && otherPosition.y >= position.y))
 						direction.y = -1;
-
+					
 					position += direction.ToFloat2() * 0.5f;
 				}
 				

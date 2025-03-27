@@ -8,3 +8,4 @@ Items/SceneBuilder:StructureVoidDesc	Text		Place on tile columns that shouldn't 
 SceneBuilder:FirstPointSet	Text		First point set. Select a second point.
 SceneBuilder:SecondPointSet	Text		Second point set. Ready to save!
 SceneBuilder:SavedAs	Text		Saved as {0}.json
+SceneBuilder:SaveStructure	Text		Save Structure
