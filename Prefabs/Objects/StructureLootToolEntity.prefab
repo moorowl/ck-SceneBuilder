@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: -2049387291946902799}
   - component: {fileID: -5184702542310181468}
   m_Layer: 0
-  m_Name: StructureDataToolEntity
+  m_Name: StructureLootToolEntity
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -45,7 +45,7 @@ MonoBehaviour:
   m_Script: {fileID: 318086258, guid: 9a1db145e9314404d8da91bdc1557235, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  objectName: SceneBuilder:StructureDataTool
+  objectName: SceneBuilder:StructureLootTool
   initialAmount: 1
   variation: 0
   variationIsDynamic: 0
@@ -70,9 +70,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sellValue: -1
   buyValueMultiplier: 1
-  icon: {fileID: 856741560, guid: d9dd639f25fb9394886763676835ec4e, type: 3}
+  icon: {fileID: -1975747401, guid: 9ee973f5402b55d408617ae693d2704a, type: 3}
   iconOffset: {x: 0, y: 0}
-  smallIcon: {fileID: 856741560, guid: d9dd639f25fb9394886763676835ec4e, type: 3}
+  smallIcon: {fileID: -1203970385, guid: 9ee973f5402b55d408617ae693d2704a, type: 3}
   isStackable: 0
   requiredObjectsToCraft: []
   craftingTime: 0

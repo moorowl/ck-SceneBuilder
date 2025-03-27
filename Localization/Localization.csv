@@ -1,8 +1,8 @@
 Key	Type	Desc	English
 Items/SceneBuilder:StructureSaverTool	Text		Structure Saver Tool
 Items/SceneBuilder:StructureSaverToolDesc	Text		Used to save structures.
-Items/SceneBuilder:StructureDataTool	Text		Structure Data Tool
-Items/SceneBuilder:StructureDataToolDesc	Text		Used to create data markers for structures.
+Items/SceneBuilder:StructureLootTool	Text		Structure Loot Tool
+Items/SceneBuilder:StructureLootToolDesc	Text		Used to set randomized loot for objects.
 Items/SceneBuilder:StructureVoid	Text		Structure Void
 Items/SceneBuilder:StructureVoidDesc	Text		Place on tile columns that shouldn't be included in the saved structure.
 SceneBuilder:FirstPointSet	Text		First point set. Select a second point.
