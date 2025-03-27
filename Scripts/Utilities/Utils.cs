@@ -7,6 +7,8 @@ using UnityEngine;
 
 namespace SceneBuilder.Utilities {
 	public static class Utils {
+		public const int MaxSceneSize = 64;
+		
 		private static readonly MemberInfo MiRenderText = typeof(ChatWindow).GetMembersChecked().FirstOrDefault(x => x.GetNameChecked() == "RenderText");
 		
 		public static void Log(string message) {

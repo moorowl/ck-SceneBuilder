@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using PugMod;
 using SceneBuilder.Utilities;
+using Unity.Mathematics;
 using UnityEngine;
 // ReSharper disable InconsistentNaming
 
@@ -9,11 +10,11 @@ namespace SceneBuilder.UserInterface {
 		[SerializeField] private GameObject framePrefab;
 		[SerializeField] private GameObject savePrefab;
 
-		private StructureFrameUI _frameUI;
-		private Transform _frameRenderAnchor;
-		private StructureSaveUI _saveUI;
+		public static StructureFrameUI FrameUI { get; private set; }
+		public static StructureSaveUI SaveUI { get; private set; }
 		
-		private bool _isSelectingPinB;
+		private static Transform _frameRenderAnchor;
+		private static bool _isSelectingPinB;
 
 		public static bool IsHoldingSaverTool { get; private set; }
 		public static bool IsHoldingDataTool { get; private set; }
@@ -21,8 +22,8 @@ namespace SceneBuilder.UserInterface {
 		
 		private void Start() {
 			_frameRenderAnchor = Manager.camera.GetRenderAnchor();
-			_frameUI = Instantiate(framePrefab, _frameRenderAnchor).GetComponent<StructureFrameUI>();
-			_saveUI = Instantiate(savePrefab, API.Rendering.UICamera.transform).GetComponent<StructureSaveUI>();
+			FrameUI = Instantiate(framePrefab, _frameRenderAnchor).GetComponent<StructureFrameUI>();
+			SaveUI = Instantiate(savePrefab, API.Rendering.UICamera.transform).GetComponent<StructureSaveUI>();
 		}
 
 		private void OnDestroy() {
@@ -41,16 +42,16 @@ namespace SceneBuilder.UserInterface {
 			IsHoldingVoid = heldObject == API.Authoring.GetObjectID("SceneBuilder:StructureVoid");
 			
 			var input = Manager.input.singleplayerInputModule;
-			if (IsHoldingSaverTool && !_saveUI.IsShowing && Manager.ui.currentSelectedUIElement == null && input.PrefersKeyboardAndMouse()) {
+			if (IsHoldingSaverTool && !SaveUI.IsShowing && Manager.ui.currentSelectedUIElement == null && input.PrefersKeyboardAndMouse()) {
 				var mouseTilePosition = EntityMonoBehaviour.ToWorldFromRender(Manager.ui.mouse.GetMouseGameViewPosition()).RoundToInt2();
 				
 				if (_isSelectingPinB)
-					_frameUI.PinB = mouseTilePosition;
+					FrameUI.PinB = mouseTilePosition;
 				
 				if (input.WasButtonPressedDownThisFrame(PlayerInput.InputType.UI_INTERACT)) {
 					if (!_isSelectingPinB) {
-						_frameUI.PinA = mouseTilePosition;
-						_frameUI.PinB = null;
+						FrameUI.PinA = mouseTilePosition;
+						FrameUI.PinB = null;
 						_isSelectingPinB = true;
 						Utils.SendLocalChatMessage("First point set. Select a second point.");
 					} else {
@@ -59,18 +60,15 @@ namespace SceneBuilder.UserInterface {
 					}
 				}
 
-				if (_frameUI.IsComplete && input.WasButtonPressedDownThisFrame(PlayerInput.InputType.UI_SECOND_INTERACT)) {
+				if (FrameUI.IsComplete && input.WasButtonPressedDownThisFrame(PlayerInput.InputType.UI_SECOND_INTERACT)) {
 					// save structure
-					var position = _frameUI.Position.RoundToInt().ToInt2();
-					var size = _frameUI.Size.RoundToInt().ToInt2();
+					var position = FrameUI.Position.RoundToInt().ToInt2();
+					var size = FrameUI.Size.RoundToInt().ToInt2();
 
-					_saveUI.Show(structureName => {
+					SaveUI.Show(structureName => {
 						Main.ClientCommandSystem.SaveStructure(structureName, position, size);
 						Utils.SendLocalChatMessage($"Saved as {structureName}.json");
 					});
-
-					//Main.ClientCommandSystem.SaveStructure("Test", position, size);
-					//Utils.SendLocalChatMessage("Saved");
 				}
 			}
 		}

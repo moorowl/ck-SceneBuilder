@@ -48,10 +48,18 @@ namespace SceneBuilder.Scenes {
 					continue;
 				
 				var scene = sceneFile.ConvertToDataTableScene(id, structureFile);
-				if (scene != null) {
-					Utils.Log($"- {id} (ok)");
-					serverCustomScenesTable.scenes.Add(scene);
+				if (scene == null) {
+					Utils.Log($"- {id} (skip, could not convert)");
+					continue;
 				}
+				
+				if (scene.boundsSize.x > Utils.MaxSceneSize || scene.boundsSize.y > Utils.MaxSceneSize) {
+					Utils.Log($"- {id} (skip, max scene size is {Utils.MaxSceneSize}x{Utils.MaxSceneSize})");
+					continue;
+				}
+
+				Utils.Log($"- {id} (ok)");
+				serverCustomScenesTable.scenes.Add(scene);
 			}
 		}
 		

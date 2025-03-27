@@ -9,3 +9,8 @@ SceneBuilder:FirstPointSet	Text		First point set. Select a second point.
 SceneBuilder:SecondPointSet	Text		Second point set. Ready to save!
 SceneBuilder:SavedAs	Text		Saved as {0}.json
 SceneBuilder:SaveStructure	Text		Save Structure
+SceneBuilder:DimensionsFormat	Text		Size: {0}x{1} ({2})
+SceneBuilder:Status/None	Text		Unknown
+SceneBuilder:Status/Ok	Text		Ok
+SceneBuilder:Status/TooBig	Text		Too big
+SceneBuilder:Status/AreaUnloaded	Text		Area unloaded
