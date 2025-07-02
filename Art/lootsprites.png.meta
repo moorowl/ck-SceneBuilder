@@ -194,7 +194,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: lootsprites_structure_loot
+      name: lootsprites_structure_data
       rect:
         serializedVersion: 2
         x: 16
@@ -215,7 +215,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: lootsprites_structure_loot_small
+      name: lootsprites_structure_data_small
       rect:
         serializedVersion: 2
         x: 16
@@ -246,8 +246,8 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      lootsprites_structure_loot: -1975747401
-      lootsprites_structure_loot_small: -1203970385
+      lootsprites_structure_data: -1975747401
+      lootsprites_structure_data_small: -1203970385
       lootsprites_structure_saver: -1065335452
       lootsprites_structure_saver_small: -318097207
       lootsprites_structure_void: -1272866559

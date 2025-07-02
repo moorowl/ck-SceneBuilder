@@ -1,35 +1,29 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
-using PugConversion;
+using Pug.UnityExtensions;
 using PugMod;
-using SceneBuilder.Commands;
+using PugWorldGen;
+using SceneBuilder.Networking;
 using SceneBuilder.Scenes;
 using SceneBuilder.Structures;
-using SceneBuilder.Utilities;
 using SceneBuilder.Utilities.DataStructures;
-using Unity.Entities;
-using Unity.Mathematics;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
 namespace SceneBuilder {
 	public class Main : IMod {
-		public const string Version = "1.0";
-		public const string InternalName = "SceneBuilder";
-		public const string DisplayName = "Scene Builder";
-		
-		internal static ClientCommandSystem ClientCommandSystem;
-		internal static ServerCommandSystem ServerCommandSystem;
+		internal static StructureRequestClientSystem StructureRequestClientSystem;
+		internal static StructureRequestServerSystem StructureRequestServerSystem;
 
 		private static readonly List<PoolablePrefabBank> PoolablePrefabBanks = new();
 		
 		public void EarlyInit() {
 			API.Client.OnWorldCreated += () => {
-				ClientCommandSystem = API.Client.World.GetOrCreateSystemManaged<ClientCommandSystem>();
+				StructureRequestClientSystem = API.Client.World.GetOrCreateSystemManaged<StructureRequestClientSystem>();
 			};
 			API.Server.OnWorldCreated += () => {
-				ServerCommandSystem = API.Server.World.GetOrCreateSystemManaged<ServerCommandSystem>();
+				StructureRequestServerSystem = API.Server.World.GetOrCreateSystemManaged<StructureRequestServerSystem>();
 			};
 		}
 
@@ -51,7 +45,7 @@ namespace SceneBuilder {
 
 		public void Update() {
 			if (Input.GetKeyDown(KeyCode.F8))
-				ClientCommandSystem.SpawnScene(new Identifier("TestSceneBundle", "Dirt/MeadowRuin"), Manager.main.player.GetEntityPosition().RoundToInt2(), (uint) Random.Range(0, 10000));
+				StructureRequestClientSystem?.PlaceScene(new Identifier("TestSceneBundle", "Dirt/MeadowRuin"), Manager.main.player.GetEntityPosition().RoundToInt2(), (uint) Random.Range(0, 10000));
 		}
 		
 		[HarmonyPatch]
@@ -63,7 +57,7 @@ namespace SceneBuilder {
 			}
 			
 			[HarmonyPatch(typeof(ECSManager), nameof(MemoryManager.Init))]
-			[HarmonyPrefix]
+			[HarmonyPostfix]
 			public static void InitEcs(MemoryManager __instance) {
 				StructureLoader.Instance.LoadAll();
 				SceneLoader.Instance.LoadAll();

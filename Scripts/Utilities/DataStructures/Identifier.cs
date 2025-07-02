@@ -1,11 +1,9 @@
 ﻿using System;
-using UnityEngine;
 
 namespace SceneBuilder.Utilities.DataStructures {
 	public readonly struct Identifier : IEquatable<Identifier> {
 		public readonly string Namespace;
 		public readonly string Path;
-		public readonly string AsSceneName;
 
 		private readonly string _asString;
 		
@@ -13,7 +11,6 @@ namespace SceneBuilder.Utilities.DataStructures {
 			Namespace = ns;
 			Path = path;
 			_asString = $"{Namespace}:{Path}";
-			AsSceneName = $"SB/{Animator.StringToHash(_asString)}";
 		}
 
 		public override string ToString() {

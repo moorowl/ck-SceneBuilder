@@ -1,4 +1,5 @@
-﻿using PugTilemap;
+﻿using Pug.UnityExtensions;
+using PugTilemap;
 using PugWorldGen;
 using SceneBuilder.Structures;
 using SceneBuilder.Utilities;
@@ -13,7 +14,7 @@ namespace SceneBuilder.Scenes {
 	[UpdateInGroup(typeof(SimulationSystemGroup))]
 	[UpdateBefore(typeof(ApplySpawnedCustomSceneSystem))]
 	[BurstCompile]
-	public partial class ApplySbSceneSystem : PugSimulationSystemBase {
+	public partial class SbApplySpawnedCustomSceneSystem : PugSimulationSystemBase {
 		private EntityArchetype _waterSpreaderArchetype;
 
 		protected override void OnCreate() {
@@ -21,6 +22,7 @@ namespace SceneBuilder.Scenes {
 			
 			NeedTileUpdateBuffer();
 			NeedLootBank();
+			
 			RequireForUpdate<CustomSceneTableCD>();
 			RequireForUpdate<PugDatabase.DatabaseBankCD>();
 
@@ -39,11 +41,11 @@ namespace SceneBuilder.Scenes {
 			
 			Entities
 				.ForEach((Entity entity, in LocalTransform transform, in SpawnCustomSceneCD spawnCustomScene) => {
-					if (!TryFindModdedScene(spawnCustomScene, ref scenesTable.Value, ref sceneObjectPropertiesTable.Value, out var sceneIndex, out var objectPropertiesIndex))
+					if (!TryFindModdedScene(spawnCustomScene, ref scenesTable.Value, ref sceneObjectPropertiesTable.Value, out var sceneIndex))
 						return;
 					
 					ref var scene = ref scenesTable.Value.scenes[sceneIndex];
-					ref var properties = ref sceneObjectPropertiesTable.Value.Scenes[objectPropertiesIndex];
+					ref var properties = ref sceneObjectPropertiesTable.Value.Scenes[sceneIndex];
 					
 					var position = transform.Position.RoundToInt2();
 					var rng = new Random(spawnCustomScene.seed);
@@ -93,33 +95,20 @@ namespace SceneBuilder.Scenes {
 						var prefabAuthoringEntity = scene.prefabs[i];
 						var prefabEntity = ecb.Instantiate(prefabAuthoringEntity);
 						
-						var prefabDirection = properties.PrefabDirections[i];
-						var prefabColor = properties.PrefabColors[i];
-						var prefabDropsLootTable = properties.PrefabDropsLootTable[i];
-						
-						if (SystemAPI.HasComponent<DirectionBasedOnVariationCD>(prefabAuthoringEntity)) {
-							var flippedVariation = DirectionBasedOnVariationCD.GetFlippedVariation(prefabObjectData.variation, flipDirection.x == -1, flipDirection.y == -1);
-							if (flippedVariation != prefabObjectData.variation) {
-								prefabObjectData.variation = flippedVariation;
-								ecb.SetComponent(prefabEntity, prefabObjectData);
-							}
-						} else if (SystemAPI.HasComponent<DirectionCD>(prefabAuthoringEntity)) {
-							ecb.SetComponent(prefabEntity, new DirectionCD {
-								direction = prefabDirection * flipDirection.ToInt3()
-							});
-						}
-
-						if (SystemAPI.HasComponent<PaintableObjectCD>(prefabAuthoringEntity)) {
-							ecb.SetComponent(prefabEntity, new PaintableObjectCD {
-								color = prefabColor
-							});
-						}
-						
-						if (SystemAPI.HasComponent<DropsLootFromLootTableCD>(prefabAuthoringEntity) && (int) prefabDropsLootTable > -1) {
-							ecb.SetComponent(prefabEntity, new DropsLootFromLootTableCD {
-								lootTableID = prefabDropsLootTable
-							});
-						}
+						Utils.ApplySceneObjectProperties(
+							ecb,
+							prefabEntity,
+							prefabAuthoringEntity,
+							prefabObjectData,
+							ref properties,
+							i,
+							flipDirection,
+							SystemAPI.GetComponentLookup<DirectionBasedOnVariationCD>(),
+							SystemAPI.GetComponentLookup<DirectionCD>(),
+							SystemAPI.GetComponentLookup<PaintableObjectCD>(),
+							SystemAPI.GetComponentLookup<DropsLootFromLootTableCD>(),
+							SystemAPI.GetBufferLookup<DescriptionBuffer>()
+						);
 						
 						InventoryOverrideUtility.ApplyInventoryOverridesIfPresent(
 							prefabEntity,
@@ -144,25 +133,18 @@ namespace SceneBuilder.Scenes {
 		}
 
 		[BurstCompile]
-		private static bool TryFindModdedScene(in SpawnCustomSceneCD spawnCustomScene, ref CustomSceneTableBlob customSceneTable, ref SceneObjectPropertiesTableBlob objectPropertiesTable, out int sceneIndex, out int objectPropertiesIndex) {
+		private static bool TryFindModdedScene(in SpawnCustomSceneCD spawnCustomScene, ref CustomSceneTableBlob customSceneTable, ref SceneObjectPropertiesTableBlob objectPropertiesTable, out int sceneIndex) {
 			sceneIndex = -1;
-			objectPropertiesIndex = -1;
-			
+
 			for (var i = 0; i < customSceneTable.scenes.Length; i++) {
-				if (spawnCustomScene.name.Equals(customSceneTable.scenes[i].sceneName)) {
+				var name = customSceneTable.scenes[i].sceneName;
+				if (spawnCustomScene.name.Equals(name) && SceneLoader.IsRuntimeName(name)) {
 					sceneIndex = i;
-					break;
+					return true;
 				}
 			}
 			
-			for (var i = 0; i < objectPropertiesTable.Scenes.Length; i++) {
-				if (spawnCustomScene.name.Equals(objectPropertiesTable.Scenes[i].SceneName)) {
-					objectPropertiesIndex = i;
-					break;
-				}
-			}
-			
-			return sceneIndex > -1 && objectPropertiesIndex > -1;
+			return false;
 		}
 	}
 }

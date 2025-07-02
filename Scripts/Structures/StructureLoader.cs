@@ -16,11 +16,11 @@ namespace SceneBuilder.Structures {
 			Utils.LoadFilesFromBundles("Structures", (id, data) => {
 				try {
 					var file = JsonConvert.DeserializeObject<StructureFile>(Encoding.UTF8.GetString(data));
-					file.Validate();
+					StructureFile.Converter.Validate(file);
 					Utils.Log(_loadedStructures.TryAdd(id, file) ? $"- {id} (ok)" : $"- {id} (skip, structure with this id has already been added)");
 				} catch (Exception e) {
 					Utils.Log($"- {id} (skip, parse error)");
-					Utils.Log(e.Message);
+					Utils.Log(e);
 				}
 			});
 		}

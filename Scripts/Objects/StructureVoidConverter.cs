@@ -1,15 +1,13 @@
-﻿using System.Linq;
-using HarmonyLib;
+﻿using HarmonyLib;
 using Pug.ECS.Hybrid;
 using PugConversion;
-using PugMod;
 using Unity.Mathematics;
 using UnityEngine;
 
 namespace SceneBuilder.Utilities {
 	public class StructureVoidConverter : PugConverter {
 		public override void Convert(GameObject authoring) {
-			if (IsServer || !authoring.TryGetComponent<ObjectAuthoring>(out var objectAuthoring) || objectAuthoring.objectName != "SceneBuilder:StructureVoid")
+			if (IsServer || !authoring.TryGetComponent<ObjectAuthoring>(out var objectAuthoring) || objectAuthoring.objectName != Constants.StructureVoidId)
 				return;
 			
 			var objectInfo = objectAuthoring.ObjectInfo;
@@ -39,7 +37,7 @@ namespace SceneBuilder.Utilities {
 			[HarmonyPatch(typeof(GraphicalObjectConversion), "Convert")]
 			[HarmonyPrefix]
 			public static bool Convert(GraphicalObjectConversion __instance, GameObject authoring) {
-				if (authoring.TryGetComponent<ObjectAuthoring>(out var objectAuthoring) && objectAuthoring.objectName == "SceneBuilder:StructureVoid")
+				if (authoring.TryGetComponent<ObjectAuthoring>(out var objectAuthoring) && objectAuthoring.objectName == Constants.StructureVoidId)
 					return false;
 				
 				return true;

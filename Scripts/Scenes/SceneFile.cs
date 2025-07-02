@@ -1,99 +1,87 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
-using PugMod;
 using SceneBuilder.Structures;
-using SceneBuilder.Utilities;
 using SceneBuilder.Utilities.DataStructures;
 using Unity.Mathematics;
-using UnityEditor;
-using UnityEngine;
 
 namespace SceneBuilder.Scenes {
 	public class SceneFile {
 		[JsonProperty("structure")]
-		public Identifier Structure;
+		public Identifier Structure { get; set; }
 		
 		[JsonProperty("generation")]
-		public GenerationSettings Generation;
+		public GenerationSettings Generation { get; set; }
 
 		public class GenerationSettings {
 			[JsonProperty("canFlip")]
 			[JsonConverter(typeof(StringEnumConverter))]
-			public FlipDirection CanFlip;
+			public FlipDirection CanFlip { get; set; }
 			
 			[JsonProperty("random")]
-			public RandomGenerationSettings Random;
+			public RandomGenerationSettings Random { get; set; }
+			
+			[JsonProperty("dungeon")]
+			public List<DungeonGenerationSettings> Dungeon { get; set; }
 		}
 
 		public class RandomGenerationSettings {
 			[JsonProperty("maxOccurrences")]
-			public int MaxOccurrences;
+			public int MaxOccurrences { get; set; }
 			
 			[JsonProperty("biomesToSpawnIn", ItemConverterType = typeof(StringEnumConverter))]
-			public List<Biome> BiomesToSpawnIn;
+			public List<Biome> BiomesToSpawnIn { get; set; }
 		}
 		
-		public CustomScenesDataTable.Scene ConvertToDataTableScene(Identifier id, StructureFile structureFile) {
-			var maps = GetMaps(structureFile);
-				
-			var smallestTilePosition = (int2) int.MaxValue;
-			var largestTilePosition = (int2) int.MinValue;
-			foreach (var map in maps) {
-				using var tileIterator = map.mapData.GetTileIterator();
-				while (tileIterator.MoveNext()) {
-					var position = tileIterator.CurrentPosition.ToInt2() + map.localPosition;
-					smallestTilePosition = math.min(smallestTilePosition, position);
-					largestTilePosition = math.max(largestTilePosition, position);
-				}
-			}
+		public class GuaranteedGenerationSettings {
+			[JsonProperty("distanceFromCoreInBiome")]
+			public DistanceFromCoreInBiomeGenerationSettings DistanceFromCoreInBiome { get; set; }
 			
-			var prefabs = new List<GameObject>();
-			var prefabPositions = new List<Vector3>();
-			var prefabInventoryOverrides = new List<CustomScenesDataTable.InventoryOverride>();
+			[JsonProperty("anywhereInBiome")]
+			public AnywhereInBiomeGenerationSettings AnywhereInBiome { get; set; }
 			
-			foreach (var objectData in structureFile.Objects) {
-				if (!Utils.TryFindMatchingPrefab(objectData.Id, objectData.Variation, out var prefab))
-					continue;
-				
-				prefabs.Add(prefab);
-				prefabPositions.Add(objectData.Position.ToFloat3());
+			[JsonProperty("exactPosition")]
+			public ExactPositionGenerationSettings ExactPosition { get; set; }
+		}
 
-				var inventoryOverride = new CustomScenesDataTable.InventoryOverride();
-				if (objectData.Properties.Inventory is { Count: > 0 } && prefab.TryGetComponent<InventoryAuthoring>(out var inventoryAuthoring)) {
-					inventoryOverride.hasAnyInventoryOverride = true;
-					inventoryOverride.hasItemsOverride = true;
-					inventoryOverride.itemsOverride = new List<ObjectData>();
-					inventoryOverride.itemsToRemove = inventoryAuthoring.itemsInInventory.Count;
-					
-					var itemsBySlot = objectData.Properties.Inventory.ToDictionary(x => x.Slot, x => x);
-					var highestSlotIndex = itemsBySlot.Keys.Max();
+		public class DistanceFromCoreInBiomeGenerationSettings {
+			[JsonProperty("targetDistance")]
+			public int TargetDistance { get; set; }
+			
+			[JsonProperty("biome")]
+			[JsonConverter(typeof(StringEnumConverter))]
+			public Biome BiomeToSpawnIn { get; set; }
+		}
+		
+		public class AnywhereInBiomeGenerationSettings {
+			[JsonProperty("biome")]
+			[JsonConverter(typeof(StringEnumConverter))]
+			public Biome BiomeToSpawnIn { get; set; }
+		}
+		
+		public class ExactPositionGenerationSettings {
+			[JsonProperty("position")]
+			[JsonConverter(typeof(Converters.Int2))]
+			public int2 Position { get; set; }
+		}
+		
+		public class DungeonGenerationSettings {
+			[JsonProperty("internalName")]
+			public string InternalName { get; set; } = "";
 
-					for (var i = 0; i <= highestSlotIndex; i++) {
-						if (itemsBySlot.TryGetValue(i, out var inventoryItem)) {
-							inventoryOverride.itemsOverride.Add(new ObjectData {
-								objectID = inventoryItem.Id,
-								variation = inventoryItem.Variation,
-								amount = inventoryItem.Amount
-							});
-						} else {
-							inventoryOverride.itemsOverride.Add(new ObjectData());
-						}
-					}
-				}
-				if (objectData.Properties.InventoryLootTable != null) {
-					inventoryOverride.hasAnyInventoryOverride = true;
-					inventoryOverride.hasLootTableOverride = true;
-					inventoryOverride.lootTableOverride = objectData.Properties.InventoryLootTable.Value;
-				}
-				
-				prefabInventoryOverrides.Add(inventoryOverride);
-			}
-
+			[JsonProperty("sceneGroupIndex")]
+			public int SceneGroupIndex { get; set; } = -1;
+		}
+		
+		public CustomScenesDataTable.Scene ConvertToDataTableScene(Identifier id, StructureFile structureFile, int sceneIndex) {
+			StructureFile.Converter.GetMaps(structureFile, out var maps, out var smallestTilePosition, out var largestTilePosition);
+			StructureFile.Converter.GetPrefabs(structureFile, sceneIndex, out var prefabs, out var prefabPositions, out var prefabInventoryOverrides);
+			
 			var boundsSize = new int2(math.abs(smallestTilePosition.x) + math.abs(largestTilePosition.x), math.abs(smallestTilePosition.y) + math.abs(largestTilePosition.y));
+			var supportsFlip = Generation.Dungeon == null;
+			
 			return new CustomScenesDataTable.Scene {
-				sceneName = id.AsSceneName,
+				sceneName = SceneLoader.GetRuntimeName(id),
 				maxOccurrences = Generation.Random?.MaxOccurrences ?? 0,
 				replacedByContentBundle = new OptionalValue<ContentBundleID>(),
 				biomesToSpawnIn = new WorldGenerationTypeDependentValue<List<Biome>> {
@@ -101,8 +89,8 @@ namespace SceneBuilder.Scenes {
 					fullRelease = Generation.Random?.BiomesToSpawnIn ?? new List<Biome>()
 				},
 				minDistanceFromCoreInClassicWorlds = 0,
-				canFlipX = Generation.CanFlip is FlipDirection.Horizontal or FlipDirection.HorizontalAndVertical,
-				canFlipY = Generation.CanFlip is FlipDirection.Vertical or FlipDirection.HorizontalAndVertical,
+				canFlipX = supportsFlip && (Generation.CanFlip is FlipDirection.Horizontal or FlipDirection.HorizontalAndVertical),
+				canFlipY = supportsFlip && (Generation.CanFlip is FlipDirection.Vertical or FlipDirection.HorizontalAndVertical),
 				hasCenter = false,
 				center = new int2(),
 				boundsSize = boundsSize,
@@ -111,23 +99,6 @@ namespace SceneBuilder.Scenes {
 				prefabs = prefabs,
 				prefabPositions = prefabPositions,
 				prefabInventoryOverrides = prefabInventoryOverrides
-			};
-		}
-		
-		private static List<CustomScenesDataTable.Map> GetMaps(StructureFile structureFile) {
-			var mapDataModifier = new PugMapDataModifier(new PugMapData());
-
-			foreach (var entry in structureFile.Tiles) {
-				foreach (var position in entry.Positions) {
-					mapDataModifier.Set(position.ToVec3Int(), (int) entry.Tileset, entry.TileType);
-				}
-			}
-			
-			return new List<CustomScenesDataTable.Map> {
-				new() {
-					localPosition = new int2(0, 0),
-					mapData = mapDataModifier.GetMapData()
-				}
 			};
 		}
 	}

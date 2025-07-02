@@ -1,4 +1,5 @@
-﻿using Unity.Mathematics;
+﻿using Pug.UnityExtensions;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace SceneBuilder.UserInterface {
@@ -61,9 +62,9 @@ namespace SceneBuilder.UserInterface {
 					var otherPosition = otherTilePosition.Value.ToFloat2() + 0.5f;
 					var direction = new int2(1, 1);
 
-					if (otherPosition.x > position.x || (isPinA && otherPosition.x >= position.x))
+					if (otherPosition.x > position.x || (!isPinA && otherPosition.x >= position.x))
 						direction.x = -1;
-					if (otherPosition.y > position.y || (isPinA && otherPosition.y >= position.y))
+					if (otherPosition.y > position.y || (!isPinA && otherPosition.y >= position.y))
 						direction.y = -1;
 					
 					position += direction.ToFloat2() * 0.5f;

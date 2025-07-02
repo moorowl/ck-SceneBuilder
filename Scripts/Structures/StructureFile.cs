@@ -1,17 +1,27 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
+using Pug.UnityExtensions;
 using PugMod;
+using PugProperties;
 using PugTilemap;
+using SceneBuilder.Scenes;
 using SceneBuilder.Utilities;
 using SceneBuilder.Utilities.DataStructures;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
-using Unity.Transforms;
+using UnityEditor;
+using UnityEngine;
+using Object = UnityEngine.Object;
+
+#pragma warning disable CS0618 // disable TileType.roof is obsolete
 
 namespace SceneBuilder.Structures {
 	public class StructureFile {
@@ -34,15 +44,14 @@ namespace SceneBuilder.Structures {
 		};
 		
 		[JsonProperty("objects")]
-		public List<ObjectData> Objects { get; set; }
+		public List<ObjectData> Objects { get; set; } = new();
 		
 		[JsonProperty("tiles")]
-		public List<TileAndPositions> Tiles { get; set; }
+		public List<TileAndPositions> Tiles { get; set; } = new();
 
 		public class ObjectData {
 			[JsonProperty("id")]
-			[JsonConverter(typeof(StringEnumConverter))]
-			public ObjectID Id { get; set; }
+			public string Id { get; set; }
 			
 			[JsonProperty("variation")]
 			public int Variation { get; set; }
@@ -50,12 +59,15 @@ namespace SceneBuilder.Structures {
 			[JsonProperty("position")]
 			[JsonConverter(typeof(Converters.Float2))]
 			public float2 Position { get; set; }
-			
+
 			[JsonProperty("properties")]
-			public ObjectProperties Properties { get; set; }
+			public ObjectProperties Properties { get; set; } = new();
 		}
 
 		public class ObjectProperties {
+			[JsonProperty("amount")]
+			public int? Amount { get; set; }
+			
 			[JsonProperty("direction")]
 			[JsonConverter(typeof(Converters.Int3))]
 			public int3? Direction { get; set; }
@@ -63,6 +75,9 @@ namespace SceneBuilder.Structures {
 			[JsonProperty("color")]
 			[JsonConverter(typeof(StringEnumConverter))]
 			public PaintableColor? Color { get; set; }
+			
+			[JsonProperty("description")]
+			public string Description { get; set; }
 			
 			[JsonProperty("inventory")]
 			public List<InventoryItem> Inventory { get; set; }
@@ -84,8 +99,7 @@ namespace SceneBuilder.Structures {
 			public int Slot { get; set; }
 			
 			[JsonProperty("id")]
-			[JsonConverter(typeof(StringEnumConverter))]
-			public ObjectID Id { get; set; }
+			public string Id { get; set; }
 			
 			[JsonProperty("variation")]
 			public int Variation { get; set; }
@@ -106,17 +120,158 @@ namespace SceneBuilder.Structures {
 			[JsonProperty("positions", ItemConverterType = typeof(Converters.Int2))]
 			public List<int2> Positions { get; set; }
 		}
-
-		public void Validate() {
-			Objects?.RemoveAll(objectData => ObjectsToRemove.Contains(objectData.Id) || !Utils.TryFindMatchingPrefab(objectData.Id, objectData.Variation, out _));
-			Objects?.ForEach(objectData => {
-				objectData.Id = ObjectsToReplace.GetValueOrDefault(objectData.Id, objectData.Id);
-			});
+		
+		public static class Converter {
+			public static void Validate(StructureFile structureFile) {
+				structureFile.Objects.RemoveAll(objectData => {
+					if (ObjectsToRemove.Contains(API.Authoring.GetObjectID(objectData.Id)) || !Utils.TryFindMatchingPrefab(objectData.Id, objectData.Variation, out _)) {
+						Utils.Log($"(Validation) Removing invalid object {objectData.Id}");
+						return true;
+					}
+					return false;
+				});
+				structureFile.Objects.ForEach(objectData => {
+					var id = API.Authoring.GetObjectID(objectData.Id);
+					var replacementId = ObjectsToReplace.GetValueOrDefault(id, id);
+				
+					if (id != replacementId)
+						Utils.Log($"(Validation) Replacing object {id} with {replacementId}");
+				
+					objectData.Id = replacementId.ToString();
+				});
 			
-			Tiles?.RemoveAll(tile => TileTypesToRemove.Contains(tile.TileType) || tile.Tileset < Tileset.Dirt || tile.Tileset >= Tileset.MAX_VALUE);
-			Tiles?.ForEach(tile => {
-				tile.Tileset = TilesetsToEnforce.GetValueOrDefault(tile.TileType, tile.Tileset);
-			});
+				structureFile.Tiles.RemoveAll(tile => {
+					if (TileTypesToRemove.Contains(tile.TileType) || tile.Tileset < Tileset.Dirt || tile.Tileset >= Tileset.MAX_VALUE) {
+						Utils.Log($"(Validation) Removing invalid tile type {tile.TileType}");
+						return true;
+					}
+					if (tile.Tileset < Tileset.Dirt || tile.Tileset >= Tileset.MAX_VALUE) {
+						Utils.Log($"(Validation) Removing invalid tileset {tile.Tileset}");
+						return true;
+					}
+					return false;
+				});
+				structureFile.Tiles.ForEach(tile => {
+					var replacementTileset = TilesetsToEnforce.GetValueOrDefault(tile.TileType, tile.Tileset);
+				
+					if (tile.Tileset != replacementTileset)
+						Utils.Log($"(Validation) Replacing tileset {tile.Tileset} with {replacementTileset}");
+				
+					tile.Tileset = replacementTileset;
+				});
+				
+				var tileTypesAtPosition = new Dictionary<int2, HashSet<TileType>>();
+				foreach (var tile in structureFile.Tiles) {
+					foreach (var position in tile.Positions) {
+						if (!tileTypesAtPosition.ContainsKey(position))
+							tileTypesAtPosition[position] = new HashSet<TileType>();
+
+						tileTypesAtPosition[position].Add(tile.TileType);
+					}
+				}
+				
+				// Remove tiles that are missing a required tile type (e.g. walls without ground)
+				var neededTileTypes = new NativeList<TileType>(4, Allocator.Temp);
+				foreach (var tile in structureFile.Tiles) {
+					foreach (var position in tile.Positions) {
+						if (!tileTypesAtPosition.ContainsKey(position))
+							tileTypesAtPosition[position] = new HashSet<TileType>();
+
+						tileTypesAtPosition[position].Add(tile.TileType);
+					}
+				}
+				foreach (var tile in structureFile.Tiles) {
+					neededTileTypes.Clear();
+					tile.TileType.GetNeededTile(ref neededTileTypes);
+
+					if (neededTileTypes.Length > 0) {
+						tile.Positions.RemoveAll(position => {
+							var availableTileTypes = tileTypesAtPosition[position];
+
+							for (var i = 0; i < neededTileTypes.Length; i++) {
+								if (availableTileTypes.Contains(neededTileTypes[i])) {
+									return false;
+								}
+							}
+
+							Utils.Log($"(Validation) Removing {tile.Tileset}:{tile.TileType} at {position.x}, {position.y} because it is missing a required tile type at the same position");
+							return true;
+						});
+					}
+				}
+				neededTileTypes.Dispose();
+			}
+			
+			public static void GetPrefabs(StructureFile structureFile, int sceneIndex, out List<GameObject> prefabs, out List<Vector3> prefabPositions, out List<CustomScenesDataTable.InventoryOverride> prefabInventoryOverrides) {
+				prefabs = new List<GameObject>();
+				prefabPositions = new List<Vector3>();
+				prefabInventoryOverrides = new List<CustomScenesDataTable.InventoryOverride>();
+				
+				foreach (var objectData in structureFile.Objects) {
+					if (!Utils.TryFindMatchingPrefab(objectData.Id, objectData.Variation, out var prefab))
+						continue;
+					
+					prefabs.Add(prefab);
+					prefabPositions.Add(objectData.Position.ToFloat3());
+
+					var inventoryOverride = new CustomScenesDataTable.InventoryOverride();
+					if (objectData.Properties.Inventory is { Count: > 0 } && prefab.TryGetComponent<InventoryAuthoring>(out var inventoryAuthoring)) {
+						inventoryOverride.itemsOverride = new List<global::ObjectData>();
+						inventoryOverride.itemsToRemove = inventoryAuthoring.itemsInInventory.Count;
+					
+						var itemsBySlot = objectData.Properties.Inventory
+							.GroupBy(x => x.Slot)
+							.Select(group => group.First())
+							.ToDictionary(x => x.Slot, x => x);
+						var highestSlotIndex = itemsBySlot.Keys.Max();
+
+						for (var i = 0; i <= highestSlotIndex; i++) {
+							if (itemsBySlot.TryGetValue(i, out var inventoryItem)) {
+								inventoryOverride.itemsOverride.Add(new global::ObjectData {
+									objectID = API.Authoring.GetObjectID(inventoryItem.Id),
+									variation = inventoryItem.Variation,
+									amount = inventoryItem.Amount
+								});
+							} else {
+								inventoryOverride.itemsOverride.Add(new global::ObjectData());
+							}
+						}
+					}
+
+					if (objectData.Properties.InventoryLootTable != null) {
+						inventoryOverride.hasLootTableOverride = true;
+						inventoryOverride.lootTableOverride = objectData.Properties.InventoryLootTable.Value;
+					}
+
+					inventoryOverride.hasAnyInventoryOverride = true;
+					inventoryOverride.hasItemsOverride = true;
+					inventoryOverride.itemsOverride ??= new List<global::ObjectData>();
+
+					prefabInventoryOverrides.Add(inventoryOverride);
+				}
+			}
+			
+			public static void GetMaps(StructureFile structureFile, out List<CustomScenesDataTable.Map> maps, out int2 smallestTilePosition, out int2 largestTilePosition) {
+				var mapDataModifier = new PugMapDataModifier(new PugMapData());
+				smallestTilePosition = int.MaxValue;
+				largestTilePosition = int.MinValue;
+
+				foreach (var entry in structureFile.Tiles) {
+					foreach (var position in entry.Positions) {
+						mapDataModifier.Set(position.ToVec3Int(), (int) entry.Tileset, entry.TileType);
+						
+						smallestTilePosition = math.min(smallestTilePosition, position);
+						largestTilePosition = math.max(largestTilePosition, position);
+					}
+				}
+				
+				maps = new List<CustomScenesDataTable.Map> {
+					new() {
+						localPosition = new int2(0, 0),
+						mapData = mapDataModifier.GetMapData()
+					}
+				};
+			}
 		}
 		
 		public static class Saver {
@@ -128,7 +283,7 @@ namespace SceneBuilder.Structures {
 					Tiles = tiles,
 					Objects = objects
 				};
-				file.Validate();
+				Converter.Validate(file);
 				
 				var serialized = JsonConvert.SerializeObject(file, new JsonSerializerSettings {
 					Formatting = Formatting.Indented,
@@ -136,7 +291,7 @@ namespace SceneBuilder.Structures {
 					ContractResolver = new CamelCasePropertyNamesContractResolver()
 				}).Replace("  ", "\t");
 
-				var path = $"{Main.InternalName}/Saved/{name}.json";
+				var path = $"{Constants.InternalName}/Saved/{name}.json";
 				if (API.ConfigFilesystem.FileExists(path))
 					API.ConfigFilesystem.Delete(path);
 				API.ConfigFilesystem.Write(path, Encoding.UTF8.GetBytes(serialized));
@@ -186,54 +341,48 @@ namespace SceneBuilder.Structures {
 				var objects = new List<ObjectData>();
 				
 				var collisionWorld = API.Server.GetEntityQuery(typeof(PhysicsWorldSingleton)).GetSingleton<PhysicsWorldSingleton>().PhysicsWorld.CollisionWorld;
-				var outHits = new NativeList<DistanceHit>(Allocator.Temp);
-				var center = position.ToFloat3() + (new float2(size.x - 1f, size.y - 1f).ToFloat3() / 2f);
-				collisionWorld.OverlapBox(center, quaternion.identity, new float3((size.x - 1.5f) / 2f, 10f, (size.y - 1.5f) / 2f), ref outHits, new CollisionFilter {
-					BelongsTo = PhysicsLayerID.Everything,
-					CollidesWith = PhysicsLayerID.Everything
-				});
+				var structureVoidId = API.Authoring.GetObjectID(Constants.StructureVoidId);
 
-				var structureVoidId = API.Authoring.GetObjectID("SceneBuilder:StructureVoid");
-				var entitiesAdded = new HashSet<Entity>();
-				
-				foreach (var hit in outHits) {
-					var entity = hit.Entity;
-					if (entitiesAdded.Contains(entity))
-						continue;
-					
-					if (!EntityUtility.TryGetComponentData<ObjectDataCD>(entity, API.Server.World, out var objectData))
-						continue;
-					
-					if (!EntityUtility.TryGetComponentData<LocalTransform>(entity, API.Server.World, out var transform))
-						continue;
-
+				foreach (var (objectData, transform, entity) in Utils.ObjectQuery(collisionWorld, position, size)) {
 					if (objectData.objectID != structureVoidId && !EntityUtility.HasComponentData<DontSerializeCD>(entity, API.Server.World)) {
 						objects.Add(new ObjectData {
-							Id = objectData.objectID,
+							Id = API.Authoring.ObjectProperties.GetPropertyString(objectData.objectID, PropertyID.name),
 							Variation = objectData.variation,
-							Position = transform.Position.ToFloat2() - position,
-							Properties = GetObjectProperties(entity)
+							Position = transform.ToFloat2() - position,
+							Properties = GetObjectProperties(objectData, entity)
 						});
+						var localPosition = transform.ToFloat2() - position;
+						Utils.Log($"GetObjects - {objectData.objectID}:{objectData.variation} at {localPosition.x}, {localPosition.y}");
 					} else {
-						structureVoidPositions.Add(transform.Position.RoundToInt2() - position);
+						structureVoidPositions.Add(transform.RoundToInt2() - position);
 					}
-
-					entitiesAdded.Add(entity);
 				}
 				
-				outHits.Dispose();
 				return objects;
 			}
 			
-			private static ObjectProperties GetObjectProperties(Entity entity) {
+			private static ObjectProperties GetObjectProperties(ObjectDataCD objectData, Entity entity) {
 				var world = API.Server.World;
 				var properties = new ObjectProperties();
+				
+				if (objectData.amount != PugDatabase.GetObjectInfo(objectData.objectID, objectData.variation).initialAmount)
+					properties.Amount = objectData.amount;
 			
 				if (EntityUtility.TryGetComponentData<DirectionCD>(entity, world, out var directionData))
 					properties.Direction = directionData.direction.RoundToInt3();
 			
 				if (EntityUtility.TryGetComponentData<PaintableObjectCD>(entity, world, out var paintableData))
 					properties.Color = paintableData.color;
+
+				if (EntityUtility.TryGetBuffer<DescriptionBuffer>(entity, world, out var descriptionBuffer)) {
+					var textBuffer = new byte[descriptionBuffer.Length];
+					for (var i = 0; i < descriptionBuffer.Length; i++)
+						textBuffer[i] = descriptionBuffer[i].Value;
+					
+					var text = Encoding.UTF8.GetString(textBuffer);
+					if (!string.IsNullOrWhiteSpace(text))
+						properties.Description = text;
+				}
 
 				if (EntityUtility.TryGetBuffer<ContainedObjectsBuffer>(entity, world, out var containedObjects)) {
 					properties.Inventory = new List<InventoryItem>();
@@ -244,13 +393,17 @@ namespace SceneBuilder.Structures {
 						if (!Utils.IsContainedObjectEmpty(containedObject)) {
 							properties.Inventory.Add(new InventoryItem {
 								Slot = i,
-								Id = containedObject.objectID,
+								Id = API.Authoring.ObjectProperties.GetPropertyString(containedObject.objectID, PropertyID.name),
 								Variation = containedObject.variation,
 								Amount = containedObject.amount
 							});
 						}
 					}
 				}
+				
+				// Only save if the default entity doesn't have DropsLootFromLootTableCD, or the loot table is different
+				if (EntityUtility.TryGetComponentData<DropsLootFromLootTableCD>(entity, world, out var dropsLootFromLootTableData) && (!PugDatabase.TryGetComponent<DropsLootFromLootTableCD>(objectData, out var defaultDropsLootFromLootTableData) || dropsLootFromLootTableData.lootTableID != defaultDropsLootFromLootTableData.lootTableID))
+					properties.DropsLootTable = dropsLootFromLootTableData.lootTableID;
 
 				return properties;
 			}

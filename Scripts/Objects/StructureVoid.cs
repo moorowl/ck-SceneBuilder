@@ -3,7 +3,7 @@
 namespace SceneBuilder.Objects {
 	public class StructureVoid : EntityMonoBehaviour {
 		public override void ManagedLateUpdate() {
-			XScaler.gameObject.SetActive(!isHidden && (StructureUI.IsHoldingVoid || StructureUI.IsHoldingDataTool || StructureUI.IsHoldingSaverTool));
+			XScaler.gameObject.SetActive(!isHidden && StructureUI.IsHoldingAnyTool);
 		}
 	}
 } 

@@ -48,3 +48,5 @@ MonoBehaviour:
     type: 3}
   savePrefab: {fileID: 9195834256882561758, guid: 961e88479b4c1b04ba306923954cdbbf,
     type: 3}
+  lootPrefab: {fileID: 9195834256882561758, guid: 0d782255fec28714baa31b6f011c7cf9,
+    type: 3}

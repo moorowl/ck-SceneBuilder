@@ -8,9 +8,10 @@ namespace SceneBuilder.Scenes {
 	}
 	
 	public struct SceneObjectPropertiesBlob {
-		public FixedString64Bytes SceneName;
+		public BlobArray<int> PrefabAmounts;
 		public BlobArray<int3> PrefabDirections;
 		public BlobArray<PaintableColor> PrefabColors;
+		public BlobArray<FixedString128Bytes> PrefabDescriptions;
 		public BlobArray<LootTableID> PrefabDropsLootTable;
 	}
 	
