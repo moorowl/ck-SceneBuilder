@@ -41,6 +41,8 @@ namespace SceneBuilder.Utilities {
 		
 		public static void LoadFilesFromBundles(string dataType, Action<Identifier, byte[]> callback) {
 			// Load from local files
+			if (!API.ConfigFilesystem.DirectoryExists(Constants.InternalName))
+				API.ConfigFilesystem.CreateDirectory(Constants.InternalName);
 			foreach (var path in API.ConfigFilesystem.GetFiles(Constants.InternalName)) {
 				var match = LocalFilesRegex.Match(path);
 				if (!match.Success || match.Groups.Count < 3)
