@@ -13,9 +13,9 @@ SceneBuilder:SaveToolUI/Title	Text		Save Structure
 SceneBuilder:SaveToolUI/Dimensions	Text		Dimensions: {0}x{1}
 SceneBuilder:SaveToolUI/ErrorNoName	Text		No name entered
 SceneBuilder:SaveToolUI/ErrorAreaTooBig	Text		Selected area is too big (max 64x64)
-SceneBuilder:SaveToolUI/ErrorAreaUnloaded	Text		Selected area is unloaded
+SceneBuilder:SaveToolUI/ErrorTooFarAway	Text		Selected area is too far away
 SceneBuilder:LootToolUI/Title	Text		Loot Editor
-SceneBuilder:LootToolUI/EnterInventoryLootTable	Text		Set inventory loot table..
-SceneBuilder:LootToolUI/EnterDropLootTable	Text		Set drop loot table..
+SceneBuilder:LootToolUI/EnterInventoryLootTable	Text		Enter inventory table...
+SceneBuilder:LootToolUI/EnterDropLootTable	Text		Enter drop table...
 SceneBuilder:LootToolUI/Apply	Text		Apply
 SceneBuilder:LootToolUI/ErrorUnknownLootTable	Text		Invalid loot table(s)
