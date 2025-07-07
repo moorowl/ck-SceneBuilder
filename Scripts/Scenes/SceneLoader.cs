@@ -11,6 +11,7 @@ using SceneBuilder.Utilities.DataStructures;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
+// ReSharper disable InconsistentNaming
 
 namespace SceneBuilder.Scenes {
 	public class SceneLoader {

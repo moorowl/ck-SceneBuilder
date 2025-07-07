@@ -1,7 +1,7 @@
 ﻿using System;
 using Pug.UnityExtensions;
-using PugMod;
 using SceneBuilder.Structures;
+using SceneBuilder.Utilities;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.NetCode;
@@ -30,8 +30,10 @@ namespace SceneBuilder.Networking {
 						});
 						break;
 					case StructureCommand.SetData:
-						var dataToolId = API.Authoring.GetObjectID(Constants.StructureDataToolId);
-						
+						DataToolUtils.SetDataAt(rpc.Position0, new DataToolUtils.DataEntry {
+							InventoryLootTable = (LootTableID) rpc.Position1.x,
+							DropLootTable = (LootTableID) rpc.Position1.y,
+						});
 						break;
 					default:
 						throw new NotImplementedException();

@@ -58,7 +58,7 @@ namespace SceneBuilder.UserInterface {
 
 			if (Manager.main.player != null) {
 				var frameCenter = StructureUI.FrameUI.Center.RoundToInt().ToInt2();
-				if (math.distancesq(frameCenter, Manager.main.player.GetEntityPosition().RoundToInt2()) > 100f)
+				if (math.distance(frameCenter, Manager.main.player.GetEntityPosition().RoundToInt2()) > Constants.MaxSceneSize * 2)
 					saveButton.AddError("SceneBuilder:SaveToolUI/ErrorTooFarAway");	
 			}
 			

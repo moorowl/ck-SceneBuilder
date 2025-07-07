@@ -61,7 +61,8 @@ MonoBehaviour:
   dontResetEffectsOnRender: 0
   hideInStreamerMode: 0
   maxWidth: 0
-  textString: SceneBuilder:DataToolUI/Apply
+  textString: SceneBuilder:LootToolUI/Apply
+  textSuffix: 
   formatFields: []
   overrideMaterial: {fileID: 0}
   offsetKey: 
@@ -148,8 +149,9 @@ MonoBehaviour:
   localizePlaceholders: 1
   dontResetEffectsOnRender: 0
   hideInStreamerMode: 0
-  maxWidth: 5
-  textString: SceneBuilder:DataToolUI/EnterValue
+  maxWidth: 7.5
+  textString: SceneBuilder:LootToolUI/EnterDropLootTable
+  textSuffix: 
   formatFields: []
   overrideMaterial: {fileID: 0}
   offsetKey: 
@@ -418,8 +420,9 @@ MonoBehaviour:
   localizePlaceholders: 1
   dontResetEffectsOnRender: 0
   hideInStreamerMode: 0
-  maxWidth: 5
-  textString: SceneBuilder:DataToolUI/EnterValue
+  maxWidth: 7.5
+  textString: SceneBuilder:LootToolUI/EnterInventoryLootTable
+  textSuffix: 
   formatFields: []
   overrideMaterial: {fileID: 0}
   offsetKey: 
@@ -960,7 +963,7 @@ MonoBehaviour:
       m_Calls: []
   pugText: {fileID: 5038218781773182424}
   hintText: {fileID: 8976261562530365122}
-  hintString: SceneBuilder:DataToolUI/EnterKey
+  hintString: SceneBuilder:LootToolUI/EnterInventoryLootTable
   selectedMarker: {fileID: 8046870665033725339}
   characterMarkBlinker: {fileID: 4356179280532702289}
   maxWidth: 7.5
@@ -1224,7 +1227,8 @@ MonoBehaviour:
   dontResetEffectsOnRender: 0
   hideInStreamerMode: 0
   maxWidth: 4.375
-  textString: SceneBuilder:DataToolUI/Title
+  textString: SceneBuilder:LootToolUI/Title
+  textSuffix: 
   formatFields: []
   overrideMaterial: {fileID: 0}
   offsetKey: 
@@ -1534,6 +1538,7 @@ MonoBehaviour:
   hideInStreamerMode: 0
   maxWidth: 7.5
   textString: 
+  textSuffix: 
   formatFields: []
   overrideMaterial: {fileID: 0}
   offsetKey: 
@@ -1706,6 +1711,7 @@ MonoBehaviour:
   hideInStreamerMode: 0
   maxWidth: 0
   textString: cancelDialogue
+  textSuffix: 
   formatFields: []
   overrideMaterial: {fileID: 0}
   offsetKey: 
@@ -1793,7 +1799,8 @@ MonoBehaviour:
   dontResetEffectsOnRender: 0
   hideInStreamerMode: 0
   maxWidth: 7
-  textString: SceneBuilder:DataToolUI/Title
+  textString: SceneBuilder:LootToolUI/Title
+  textSuffix: 
   formatFields: []
   overrideMaterial: {fileID: 0}
   offsetKey: 
@@ -2053,7 +2060,7 @@ MonoBehaviour:
       m_Calls: []
   pugText: {fileID: 1511208299632871389}
   hintText: {fileID: 3749366045309678695}
-  hintString: SceneBuilder:DataToolUI/EnterValue
+  hintString: SceneBuilder:LootToolUI/EnterDropLootTable
   selectedMarker: {fileID: 4659858604020905549}
   characterMarkBlinker: {fileID: 7167512759758313185}
   maxWidth: 7.5
@@ -2150,6 +2157,7 @@ MonoBehaviour:
   hideInStreamerMode: 0
   maxWidth: 7.5
   textString: 
+  textSuffix: 
   formatFields: []
   overrideMaterial: {fileID: 0}
   offsetKey: 
@@ -2559,6 +2567,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   root: {fileID: 8381790956770258063}
-  keyTextInput: {fileID: 2724538734847473724}
-  valueTextInput: {fileID: 1009417510055310663}
+  inventoryLootTableTextInput: {fileID: 2724538734847473724}
+  dropLootTableTextInput: {fileID: 1009417510055310663}
   applyButton: {fileID: 4409707832701771262}

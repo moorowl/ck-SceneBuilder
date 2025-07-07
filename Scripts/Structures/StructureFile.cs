@@ -1,25 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using Pug.UnityExtensions;
-using PugMod;
-using PugProperties;
 using PugTilemap;
-using SceneBuilder.Scenes;
 using SceneBuilder.Utilities;
 using SceneBuilder.Utilities.DataStructures;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
-using UnityEditor;
 using UnityEngine;
-using Object = UnityEngine.Object;
+using API = PugMod.API;
 
 #pragma warning disable CS0618 // disable TileType.roof is obsolete
 
@@ -342,17 +336,27 @@ namespace SceneBuilder.Structures {
 				
 				var collisionWorld = API.Server.GetEntityQuery(typeof(PhysicsWorldSingleton)).GetSingleton<PhysicsWorldSingleton>().PhysicsWorld.CollisionWorld;
 				var structureVoidId = API.Authoring.GetObjectID(Constants.StructureVoidId);
+				var lootToolId = API.Authoring.GetObjectID(Constants.StructureLootToolId);
 
-				foreach (var (objectData, transform, entity) in Utils.ObjectQuery(collisionWorld, position, size)) {
-					if (objectData.objectID != structureVoidId && !EntityUtility.HasComponentData<DontSerializeCD>(entity, API.Server.World)) {
+				foreach (var (objectData, transform, entity) in Utils.ObjectQuery(collisionWorld, API.Server.World, position, size)) {
+					if (EntityUtility.HasComponentData<DontSerializeCD>(entity, API.Server.World) || objectData.objectID == lootToolId)
+						continue;
+
+					DataToolUtils.DataEntry? optionalDataEntry = null;
+
+					var objectType = EntityUtility.GetComponentData<ObjectTypeCD>(entity, API.Server.World).Value;
+					var isCreature = objectType is ObjectType.Creature or ObjectType.Critter;
+
+					if (!isCreature && (EntityUtility.HasComponentData<ContainedObjectsBuffer>(entity, API.Server.World) || EntityUtility.HasComponentData<DropsLootFromLootTableCD>(entity, API.Server.World)))
+						optionalDataEntry = DataToolUtils.GetDataAt(transform.RoundToInt2(), true);
+
+					if (objectData.objectID != structureVoidId) {
 						objects.Add(new ObjectData {
-							Id = API.Authoring.ObjectProperties.GetPropertyString(objectData.objectID, PropertyID.name),
+							Id = Utils.GetObjectIdName(objectData.objectID),
 							Variation = objectData.variation,
 							Position = transform.ToFloat2() - position,
-							Properties = GetObjectProperties(objectData, entity)
+							Properties = GetObjectProperties(objectData, entity, optionalDataEntry)
 						});
-						var localPosition = transform.ToFloat2() - position;
-						Utils.Log($"GetObjects - {objectData.objectID}:{objectData.variation} at {localPosition.x}, {localPosition.y}");
 					} else {
 						structureVoidPositions.Add(transform.RoundToInt2() - position);
 					}
@@ -361,7 +365,7 @@ namespace SceneBuilder.Structures {
 				return objects;
 			}
 			
-			private static ObjectProperties GetObjectProperties(ObjectDataCD objectData, Entity entity) {
+			private static ObjectProperties GetObjectProperties(ObjectDataCD objectData, Entity entity, DataToolUtils.DataEntry? optionalDataEntry) {
 				var world = API.Server.World;
 				var properties = new ObjectProperties();
 				
@@ -393,17 +397,27 @@ namespace SceneBuilder.Structures {
 						if (!Utils.IsContainedObjectEmpty(containedObject)) {
 							properties.Inventory.Add(new InventoryItem {
 								Slot = i,
-								Id = API.Authoring.ObjectProperties.GetPropertyString(containedObject.objectID, PropertyID.name),
+								Id = Utils.GetObjectIdName(containedObject.objectID),
 								Variation = containedObject.variation,
 								Amount = containedObject.amount
 							});
 						}
 					}
+
+					var inventoryLootTable = optionalDataEntry?.InventoryLootTable ?? LootTableID.Empty;
+					if (inventoryLootTable != LootTableID.Empty)
+						properties.InventoryLootTable = inventoryLootTable;
 				}
 				
 				// Only save if the default entity doesn't have DropsLootFromLootTableCD, or the loot table is different
 				if (EntityUtility.TryGetComponentData<DropsLootFromLootTableCD>(entity, world, out var dropsLootFromLootTableData) && (!PugDatabase.TryGetComponent<DropsLootFromLootTableCD>(objectData, out var defaultDropsLootFromLootTableData) || dropsLootFromLootTableData.lootTableID != defaultDropsLootFromLootTableData.lootTableID))
 					properties.DropsLootTable = dropsLootFromLootTableData.lootTableID;
+
+				if (!EntityUtility.HasComponentData<ContainedObjectsBuffer>(entity, world)) {
+					var dropLootTable = optionalDataEntry?.DropLootTable ?? LootTableID.Empty;
+					if (dropLootTable != LootTableID.Empty)
+						properties.DropsLootTable = dropLootTable;
+				}
 
 				return properties;
 			}

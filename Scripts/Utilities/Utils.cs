@@ -19,7 +19,7 @@ namespace SceneBuilder.Utilities {
 		private static readonly MemberInfo MiRenderText = typeof(ChatWindow).GetMembersChecked().FirstOrDefault(x => x.GetNameChecked() == "RenderText");
 		
 		public static void Log(string message) {
-			Debug.Log($"[{Constants.DisplayName}]: {message}");
+			Debug.Log($"[{Constants.FriendlyName}]: {message}");
 		}
 		
 		public static void Log(Exception exception) {
@@ -87,6 +87,13 @@ namespace SceneBuilder.Utilities {
 					}	
 				}
 			}
+		}
+
+		public static string GetObjectIdName(ObjectID id) {
+			if (!API.Authoring.ObjectProperties.TryGetPropertyString(id, "name", out var objectIdAsString))
+				objectIdAsString = id.ToString();
+
+			return objectIdAsString;
 		}
 		
 		public static bool TryFindMatchingPrefab(string id, int variation, out GameObject prefab) {
@@ -158,7 +165,7 @@ namespace SceneBuilder.Utilities {
 			}
 		}
 
-		public static List<(ObjectDataCD ObjectData, float3 Position, Entity Entity)> ObjectQuery(CollisionWorld collisionWorld, int2 position, int2 size) {
+		public static List<(ObjectDataCD ObjectData, float3 Position, Entity Entity)> ObjectQuery(CollisionWorld collisionWorld, World ecsWorld, int2 position, int2 size) {
 			var objects = new List<(ObjectDataCD ObjectData, float3 Position, Entity Entity)>();
 			var entitiesAdded = new HashSet<Entity>();
 
@@ -174,10 +181,10 @@ namespace SceneBuilder.Utilities {
 				if (entitiesAdded.Contains(entity))
 					continue;
 					
-				if (!EntityUtility.TryGetComponentData<ObjectDataCD>(entity, API.Server.World, out var objectData))
+				if (!EntityUtility.TryGetComponentData<ObjectDataCD>(entity, ecsWorld, out var objectData))
 					continue;
 					
-				if (!EntityUtility.TryGetComponentData<LocalTransform>(entity, API.Server.World, out var transform))
+				if (!EntityUtility.TryGetComponentData<LocalTransform>(entity, ecsWorld, out var transform))
 					continue;
 
 				var tilePosition = transform.Position.RoundToInt2();
@@ -193,8 +200,8 @@ namespace SceneBuilder.Utilities {
 			return objects;
 		}
 
-		public static List<(ObjectDataCD ObjectData, float3 Position, Entity Entity)> ObjectQuery(CollisionWorld collisionWorld, int2 position) {
-			return ObjectQuery(collisionWorld, position, new int2(1, 1));
+		public static List<(ObjectDataCD ObjectData, float3 Position, Entity Entity)> ObjectQuery(CollisionWorld collisionWorld, World ecsWorld, int2 position) {
+			return ObjectQuery(collisionWorld, ecsWorld, position, new int2(1, 1));
 		}
 	}
 }

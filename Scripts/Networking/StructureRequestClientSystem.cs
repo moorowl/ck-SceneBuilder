@@ -1,4 +1,5 @@
 ﻿using SceneBuilder.Scenes;
+using SceneBuilder.Utilities;
 using SceneBuilder.Utilities.DataStructures;
 using Unity.Collections;
 using Unity.Entities;
@@ -33,9 +34,18 @@ namespace SceneBuilder.Networking {
 
 		public void SaveStructure(string name, int2 position, int2 size) {
 			_rpcQueue.Enqueue(new StructureRequest {
+				Command = StructureCommand.Save,
 				String0 = new FixedString64Bytes(name),
 				Position0 = position,
 				Position1 = size
+			});
+		}
+		
+		public void SetData(int2 tilePosition, DataToolUtils.DataEntry entry) {
+			_rpcQueue.Enqueue(new StructureRequest {
+				Command = StructureCommand.SetData,
+				Position0 = tilePosition,
+				Position1 = new int2((int) entry.InventoryLootTable, (int) entry.DropLootTable)
 			});
 		}
 		

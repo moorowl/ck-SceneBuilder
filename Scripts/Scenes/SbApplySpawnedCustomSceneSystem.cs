@@ -1,10 +1,8 @@
 ﻿using Pug.UnityExtensions;
 using PugTilemap;
 using PugWorldGen;
-using SceneBuilder.Structures;
 using SceneBuilder.Utilities;
 using Unity.Burst;
-using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;

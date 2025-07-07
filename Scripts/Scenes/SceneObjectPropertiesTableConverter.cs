@@ -25,30 +25,33 @@ namespace SceneBuilder.Scenes {
 			for (var sceneIndex = 0; sceneIndex < scenes.Count; sceneIndex++) {
 				var scene = scenes[sceneIndex];
 
-				if (SceneLoader.Instance.TryGetFromRuntimeName(scene.sceneName, out var sceneFile) && StructureLoader.Instance.TryGetStructure(sceneFile.Structure, out var structureFile)) {
-					var prefabAmounts = builder.Allocate(ref objectProperties[sceneIndex].PrefabAmounts, structureFile.Objects.Count);
-					var prefabDirections = builder.Allocate(ref objectProperties[sceneIndex].PrefabDirections, structureFile.Objects.Count);
-					var prefabColors = builder.Allocate(ref objectProperties[sceneIndex].PrefabColors, structureFile.Objects.Count);
-					var prefabDescriptions = builder.Allocate(ref objectProperties[sceneIndex].PrefabDescriptions, structureFile.Objects.Count);
-					var prefabDropsLootTable = builder.Allocate(ref objectProperties[sceneIndex].PrefabDropsLootTable, structureFile.Objects.Count);
+				if (!SceneLoader.Instance.TryGetFromRuntimeName(scene.sceneName, out var sceneFile))
+					continue;
+				if (!StructureLoader.Instance.TryGetStructure(sceneFile.Structure, out var structureFile))
+					continue;
 				
-					for (var i = 0; i < structureFile.Objects.Count; i++) {
-						var objectData = structureFile.Objects[i];
-						var properties = objectData.Properties;
+				var prefabAmounts = builder.Allocate(ref objectProperties[sceneIndex].PrefabAmounts, structureFile.Objects.Count);
+				var prefabDirections = builder.Allocate(ref objectProperties[sceneIndex].PrefabDirections, structureFile.Objects.Count);
+				var prefabColors = builder.Allocate(ref objectProperties[sceneIndex].PrefabColors, structureFile.Objects.Count);
+				var prefabDescriptions = builder.Allocate(ref objectProperties[sceneIndex].PrefabDescriptions, structureFile.Objects.Count);
+				var prefabDropsLootTable = builder.Allocate(ref objectProperties[sceneIndex].PrefabDropsLootTable, structureFile.Objects.Count);
+				
+				for (var i = 0; i < structureFile.Objects.Count; i++) {
+					var objectData = structureFile.Objects[i];
+					var properties = objectData.Properties;
 						
-						prefabAmounts[i] = properties.Amount ?? -1;
+					prefabAmounts[i] = properties.Amount ?? -1;
 					
-						if (properties.Direction != null)
-							prefabDirections[i] = properties.Direction.Value;
+					if (properties.Direction != null)
+						prefabDirections[i] = properties.Direction.Value;
 					
-						if (properties.Color != null)
-							prefabColors[i] = properties.Color.Value;
+					if (properties.Color != null)
+						prefabColors[i] = properties.Color.Value;
 						
-						if (properties.Description != null)
-							prefabDescriptions[i] = properties.Description;
+					if (properties.Description != null)
+						prefabDescriptions[i] = properties.Description;
 					
-						prefabDropsLootTable[i] = properties.DropsLootTable.GetValueOrDefault((LootTableID) (-1));
-					}	
+					prefabDropsLootTable[i] = properties.DropsLootTable.GetValueOrDefault((LootTableID) (-1));
 				}
 			}
 			
