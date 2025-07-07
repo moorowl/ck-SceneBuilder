@@ -166,21 +166,23 @@ namespace SceneBuilder.Scenes {
 						Ecb.AddComponent<CustomSceneObjectCD>(entity);
 						
 						if (dungeonObject.optionalSceneIndex > -1 && dungeonObject.optionalInventoryOverrideIndex > -1) {
-							ref var properties = ref SceneObjectPropertiesTable.Value.Scenes[dungeonObject.optionalSceneIndex];
-							Utils.ApplySceneObjectProperties(
-								Ecb,
-								entity,
-								dungeonObject.prefabEntity,
-								objectData,
-								ref properties,
-								dungeonObject.optionalInventoryOverrideIndex,
-								new int2(1, 1),
-								DirectionBasedOnVariationLookup,
-								DirectionLookup,
-								PaintableObjectLookup,
-								DropsLootFromLootTableLookup,
-								DescriptionBufferLookup
-							);
+							if (SceneLoader.IsRuntimeName(CustomSceneTable.Value.scenes[dungeonObject.optionalSceneIndex].sceneName)) {
+								ref var properties = ref SceneObjectPropertiesTable.Value.Scenes[dungeonObject.optionalSceneIndex];
+								Utils.ApplySceneObjectProperties(
+									Ecb,
+									entity,
+									dungeonObject.prefabEntity,
+									objectData,
+									ref properties,
+									dungeonObject.optionalInventoryOverrideIndex,
+									new int2(1, 1),
+									DirectionBasedOnVariationLookup,
+									DirectionLookup,
+									PaintableObjectLookup,
+									DropsLootFromLootTableLookup,
+									DescriptionBufferLookup
+								);	
+							}
 							
 							ref var inventoryOverride = ref CustomSceneTable.Value.scenes[dungeonObject.optionalSceneIndex].prefabInventoryOverrides[dungeonObject.optionalInventoryOverrideIndex];
 							InventoryOverrideUtility.ApplyInventoryOverridesIfPresent(entity, dungeonObject.prefabEntity, ref inventoryOverride, Ecb, AddRandomLootLookup, ContainedBufferLookup, Database);
