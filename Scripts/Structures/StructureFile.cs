@@ -37,6 +37,9 @@ namespace SceneBuilder.Structures {
 			{ TileType.roofHole, Tileset.Dirt }
 		};
 		
+		[JsonProperty("version")]
+		public int Version { get; set; } = 0;
+		
 		[JsonProperty("objects")]
 		public List<ObjectData> Objects { get; set; } = new();
 		

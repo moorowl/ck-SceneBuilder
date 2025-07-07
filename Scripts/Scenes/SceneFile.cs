@@ -7,6 +7,9 @@ using Unity.Mathematics;
 
 namespace SceneBuilder.Scenes {
 	public class SceneFile {
+		[JsonProperty("version")]
+		public int Version { get; set; } = 0;
+		
 		[JsonProperty("structure")]
 		public Identifier Structure { get; set; }
 		
