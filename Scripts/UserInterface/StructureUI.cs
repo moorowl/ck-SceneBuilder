@@ -48,8 +48,6 @@ namespace SceneBuilder.UserInterface {
 			IsHoldingLootTool = heldObject == API.Authoring.GetObjectID(Constants.StructureLootToolId);
 			IsHoldingVoid = heldObject == API.Authoring.GetObjectID(Constants.StructureVoidId);
 			
-			FrameUI.PinPreview = null;
-			
 			var input = Manager.input.singleplayerInputModule;
 			if (!SaveUI.IsShowing && !LootUI.IsShowing && Manager.ui.currentSelectedUIElement == null && !Manager.main.player.isInteractionBlocked && input.PrefersKeyboardAndMouse()) {
 				var mouseTilePosition = EntityMonoBehaviour.ToWorldFromRender(Manager.ui.mouse.GetMouseGameViewPosition()).RoundToInt2();
