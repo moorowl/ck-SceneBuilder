@@ -149,8 +149,8 @@ namespace SceneBuilder.Scenes {
 			[HarmonyPatch(typeof(SceneReference), "get_SceneName")]
 			[HarmonyPrefix]
 			public static bool get_SceneName(SceneReference __instance, ref string __result) {
-				if (__instance.ScenePath.StartsWith("#")) {
-					__result = __instance.ScenePath;
+				if (__instance.ScenePath.StartsWith("#") && __instance.ScenePath.Length >= 4 && Identifier.TryParse(__instance.ScenePath.Substring(1), out var id)) {
+					__result = GetRuntimeName(id);
 					return false;
 				}
 				return true;
