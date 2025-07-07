@@ -50,7 +50,7 @@ namespace SceneBuilder.UserInterface {
 		}
 		public Vector2 Center => Position + (Size / 2f);
 		
-		private void LateUpdate() {
+		private void Update() {
 			if (IsComplete && StructureUI.IsHoldingSaverTool) {
 				frame.size = new Vector2(Size.x, Size.y);
 				frame.transform.localPosition = new Vector3(Center.x, Center.y, frame.transform.localPosition.z);
