@@ -3,6 +3,7 @@ using PugConversion;
 using SceneBuilder.Structures;
 using Unity.Collections;
 using Unity.Entities;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace SceneBuilder.Scenes {
@@ -41,16 +42,9 @@ namespace SceneBuilder.Scenes {
 					var properties = objectData.Properties;
 						
 					prefabAmounts[i] = properties.Amount ?? -1;
-					
-					if (properties.Direction != null)
-						prefabDirections[i] = properties.Direction.Value;
-					
-					if (properties.Color != null)
-						prefabColors[i] = properties.Color.Value;
-						
-					if (properties.Description != null)
-						prefabDescriptions[i] = properties.Description;
-					
+					prefabDirections[i] = properties.Direction ?? new int3(0, 0, -1);
+					prefabColors[i] = properties.Color ?? PaintableColor.Unpainted;
+					prefabDescriptions[i] = properties.Description ?? string.Empty;
 					prefabDropsLootTable[i] = properties.DropsLootTable.GetValueOrDefault((LootTableID) (-1));
 				}
 			}
