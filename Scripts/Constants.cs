@@ -2,7 +2,7 @@
 	public static class Constants {
 		public const string Version = "1.0";
 		public const string InternalName = "SceneBuilder";
-		public const string FriendlyName = "Scene Builder";
+		public const string FriendlyName = "SceneBuilder";
 
 		public const string StructureSaverToolId = "SceneBuilder:StructureSaverTool";
 		public const string StructureLootToolId = "SceneBuilder:StructureLootTool";
