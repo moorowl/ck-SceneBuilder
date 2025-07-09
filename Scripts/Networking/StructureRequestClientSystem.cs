@@ -22,7 +22,7 @@ namespace SceneBuilder.Networking {
 
 			base.OnCreate();
 		}
-		
+
 		public void PlaceScene(Identifier id, int2 position, uint seed = 0) {
 			_rpcQueue.Enqueue(new StructureRequest {
 				Command = StructureCommand.Place,
@@ -40,7 +40,7 @@ namespace SceneBuilder.Networking {
 				Position1 = size
 			});
 		}
-		
+
 		public void SetData(int2 tilePosition, DataToolUtils.DataEntry entry) {
 			_rpcQueue.Enqueue(new StructureRequest {
 				Command = StructureCommand.SetData,
@@ -48,7 +48,7 @@ namespace SceneBuilder.Networking {
 				Position1 = new int2((int) entry.InventoryLootTable, (int) entry.DropLootTable)
 			});
 		}
-		
+
 		protected override void OnUpdate() {
 			var ecb = CreateCommandBuffer();
 

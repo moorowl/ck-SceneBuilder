@@ -6,7 +6,7 @@ namespace SceneBuilder.Scenes {
 	public struct SceneObjectPropertiesTableBlob {
 		public BlobArray<SceneObjectPropertiesBlob> Scenes;
 	}
-	
+
 	public struct SceneObjectPropertiesBlob {
 		public BlobArray<int> PrefabAmounts;
 		public BlobArray<int3> PrefabDirections;
@@ -14,7 +14,7 @@ namespace SceneBuilder.Scenes {
 		public BlobArray<FixedString128Bytes> PrefabDescriptions;
 		public BlobArray<LootTableID> PrefabDropsLootTable;
 	}
-	
+
 	public struct SceneObjectPropertiesTable : IComponentData {
 		public BlobAssetReference<SceneObjectPropertiesTableBlob> Value;
 	}

@@ -17,10 +17,10 @@ namespace SceneBuilder.Scenes {
 
 		protected override void OnCreate() {
 			base.OnCreate();
-			
+
 			NeedTileUpdateBuffer();
 			NeedLootBank();
-			
+
 			RequireForUpdate<CustomSceneTableCD>();
 			RequireForUpdate<PugDatabase.DatabaseBankCD>();
 
@@ -29,25 +29,25 @@ namespace SceneBuilder.Scenes {
 
 		protected override void OnUpdate() {
 			base.OnUpdate();
-			
+
 			var ecb = CreateCommandBuffer();
 			var tileAccessor = CreateTileAccessor(false);
 			var tileUpdateBufferEntity = tileUpdateBufferSingletonEntity;
 			var pugDatabase = SystemAPI.GetSingleton<PugDatabase.DatabaseBankCD>();
 			var scenesTable = SystemAPI.GetSingleton<CustomSceneTableCD>().Value;
 			var sceneObjectPropertiesTable = SystemAPI.GetSingleton<SceneObjectPropertiesTable>().Value;
-			
+
 			Entities
 				.ForEach((Entity entity, in LocalTransform transform, in SpawnCustomSceneCD spawnCustomScene) => {
 					if (!TryFindModdedScene(spawnCustomScene, ref scenesTable.Value, ref sceneObjectPropertiesTable.Value, out var sceneIndex))
 						return;
-					
+
 					ref var scene = ref scenesTable.Value.scenes[sceneIndex];
 					ref var properties = ref sceneObjectPropertiesTable.Value.Scenes[sceneIndex];
-					
+
 					var position = transform.Position.RoundToInt2();
 					var rng = new Random(spawnCustomScene.seed);
-					
+
 					var tileAreaIsUninitialized = false;
 					var flipDirection = new int2((!scene.canFlipX || !rng.NextBool()) ? 1 : (-1), (!scene.canFlipY || !rng.NextBool()) ? 1 : (-1));
 					for (var i = 0; i < scene.tilePositions.Length; i++) {
@@ -57,7 +57,7 @@ namespace SceneBuilder.Scenes {
 								tileAccessor.Clear(tilePosition);
 								continue;
 							}
-							
+
 							ecb.AppendToBuffer(tileUpdateBufferEntity, new TileUpdateBuffer {
 								command = TileUpdateBuffer.Command.Add,
 								position = tilePosition
@@ -65,6 +65,7 @@ namespace SceneBuilder.Scenes {
 							tileAreaIsUninitialized = true;
 						}
 					}
+
 					for (var i = 0; i < scene.tilePositions.Length; i++) {
 						if (scene.tiles[i].tileType == TileType.none)
 							continue;
@@ -80,19 +81,19 @@ namespace SceneBuilder.Scenes {
 							}
 						}
 					}
-					
+
 					if (tileAreaIsUninitialized)
 						return;
-					
+
 					var positionF = position.ToFloat3();
 					var center = scene.centerPosition.ToFloat3();
 					var flipDirectionF = flipDirection.ToFloat3();
-					
+
 					for (var i = 0; i < scene.prefabPositions.Length; i++) {
 						var prefabObjectData = scene.prefabObjectDatas[i];
 						var prefabAuthoringEntity = scene.prefabs[i];
 						var prefabEntity = ecb.Instantiate(prefabAuthoringEntity);
-						
+
 						Utils.ApplySceneObjectProperties(
 							ecb,
 							prefabEntity,
@@ -107,7 +108,7 @@ namespace SceneBuilder.Scenes {
 							SystemAPI.GetComponentLookup<DropsLootFromLootTableCD>(),
 							SystemAPI.GetBufferLookup<DescriptionBuffer>()
 						);
-						
+
 						InventoryOverrideUtility.ApplyInventoryOverridesIfPresent(
 							prefabEntity,
 							prefabAuthoringEntity,
@@ -117,13 +118,13 @@ namespace SceneBuilder.Scenes {
 							SystemAPI.GetBufferLookup<ContainedObjectsBuffer>(),
 							pugDatabase.databaseBankBlob
 						);
-						
+
 						var prefabTileOffset = math.min(0, flipDirection) * (scene.prefabSizes[i] + scene.prefabCornerOffsets[i] * 2 - 1);
 						var prefabPosition = positionF + flipDirectionF * (scene.prefabPositions[i] - center) + prefabTileOffset.ToFloat3();
 						ecb.SetComponent(prefabEntity, LocalTransform.FromPosition(prefabPosition));
 						ecb.AddComponent<CustomSceneObjectCD>(prefabEntity);
 					}
-					
+
 					EntityManager.DestroyEntity(entity);
 				})
 				.WithStructuralChanges()
@@ -141,7 +142,7 @@ namespace SceneBuilder.Scenes {
 					return true;
 				}
 			}
-			
+
 			return false;
 		}
 	}

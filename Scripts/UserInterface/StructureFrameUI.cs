@@ -18,28 +18,29 @@ namespace SceneBuilder.UserInterface {
 
 		public bool PinAHovered => PinA != null && PinA.Value.Equals(EntityMonoBehaviour.ToWorldFromRender(Manager.ui.mouse.GetMouseGameViewPosition()).RoundToInt2());
 		public bool PinBHovered => PinB != null && PinB.Value.Equals(EntityMonoBehaviour.ToWorldFromRender(Manager.ui.mouse.GetMouseGameViewPosition()).RoundToInt2());
-		
+
 		public Vector3 PinARenderPosition => PinA != null ? pinA.transform.localPosition : Vector3.zero;
 		public Vector3 PinBRenderPosition => PinB != null ? pinB.transform.localPosition : Vector3.zero;
 		public Vector3 PinPreviewRenderPosition => PinPreview != null ? pinPreview.transform.localPosition : Vector3.zero;
-		
+
 		public bool IsComplete => PinA != null && PinB != null;
-		
+
 		public Vector2 Position {
 			get {
 				if (!IsComplete)
 					return default;
-				
+
 				var minX = math.min(PinA.Value.x, PinB.Value.x);
 				var minY = math.min(PinA.Value.y, PinB.Value.y);
 				return new Vector2(minX, minY);
 			}
 		}
+
 		public Vector2 Size {
 			get {
 				if (!IsComplete)
 					return default;
-				
+
 				var minX = math.min(PinA.Value.x, PinB.Value.x);
 				var minY = math.min(PinA.Value.y, PinB.Value.y);
 				var maxX = math.max(PinA.Value.x, PinB.Value.x) + 1;
@@ -48,8 +49,9 @@ namespace SceneBuilder.UserInterface {
 				return new Vector2(math.abs(maxX - minX), math.abs(maxY - minY));
 			}
 		}
+
 		public Vector2 Center => Position + (Size / 2f);
-		
+
 		private void Update() {
 			if (IsComplete && StructureUI.IsHoldingSaverTool) {
 				frame.size = new Vector2(Size.x, Size.y);
@@ -57,7 +59,7 @@ namespace SceneBuilder.UserInterface {
 			} else {
 				frame.size = new Vector2(0f, 0f);
 			}
-			
+
 			// pin a
 			UpdatePinSr(pinA, PinA, StructureUI.IsHoldingSaverTool, PinAHovered);
 			UpdatePinSr(pinB, PinB, StructureUI.IsHoldingSaverTool, PinBHovered);
@@ -72,6 +74,7 @@ namespace SceneBuilder.UserInterface {
 			} else {
 				sr.color = sr.color.ColorWithNewAlpha(0f);
 			}
+
 			sr.sprite = isHovered ? hoveredPinSprite : pinSprite;
 		}
 	}

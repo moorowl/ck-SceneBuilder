@@ -6,12 +6,13 @@ using SceneBuilder.Objects;
 using SceneBuilder.Scenes;
 using SceneBuilder.Structures;
 using UnityEngine;
+
 // ReSharper disable InconsistentNaming
 
 namespace SceneBuilder {
 	public class Main : IMod {
 		internal static StructureRequestClientSystem StructureRequestClientSystem { get; private set; }
-		
+
 		public void EarlyInit() {
 			Debug.Log($"[{Constants.FriendlyName}]: Mod version: {Constants.Version}");
 
@@ -23,7 +24,7 @@ namespace SceneBuilder {
 		public void Init() {
 			var modInfo = API.ModLoader.LoadedMods.FirstOrDefault(modInfo => modInfo.Handlers.Contains(this));
 			var assetBundle = modInfo!.AssetBundles[0];
-			
+
 			var gameObject = new GameObject(Constants.InternalName);
 			Object.DontDestroyOnLoad(gameObject);
 			Object.Instantiate(assetBundle.LoadAsset<GameObject>(Constants.StructureUiPrefabPath), gameObject.transform);
@@ -37,7 +38,7 @@ namespace SceneBuilder {
 		}
 
 		public void Update() { }
-		
+
 		[HarmonyPatch]
 		public static class Patches {
 			[HarmonyPatch(typeof(ECSManager), nameof(MemoryManager.Init))]

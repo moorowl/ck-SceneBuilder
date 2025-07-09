@@ -2,7 +2,6 @@
 using SceneBuilder.Utilities;
 using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace SceneBuilder.UserInterface {
 	public class StructureLootUI : MonoBehaviour {
@@ -12,7 +11,7 @@ namespace SceneBuilder.UserInterface {
 		[SerializeField] private ErrorButtonUI applyButton;
 
 		public bool IsShowing { get; private set; }
-		
+
 		private int2 _targetTilePosition;
 
 		private void Awake() {
@@ -22,11 +21,11 @@ namespace SceneBuilder.UserInterface {
 		public void Show(int2 targetTilePosition) {
 			IsShowing = true;
 			_targetTilePosition = targetTilePosition;
-			
+
 			var existingDataEntry = DataToolUtils.GetDataAt(_targetTilePosition, false);
 			inventoryLootTableTextInput.SetInputText(existingDataEntry.InventoryLootTable == LootTableID.Empty ? "" : existingDataEntry.InventoryLootTable.ToString());
 			dropLootTableTextInput.SetInputText(existingDataEntry.DropLootTable == LootTableID.Empty ? "" : existingDataEntry.DropLootTable.ToString());
-			
+
 			UpdateErrors();
 		}
 
@@ -43,27 +42,27 @@ namespace SceneBuilder.UserInterface {
 					DropLootTable = dropLootTable
 				});
 			}
-			
+
 			Hide();
 		}
-		
+
 		private void Update() {
 			root.transform.localScale = Manager.ui.CalcGameplayUITargetScaleMultiplier();
 			root.SetActive(IsShowing && !Manager.ui.isAnyInventoryShowing && !Manager.menu.IsAnyMenuActive() && !Manager.ui.mapUI.IsShowingBigMap);
-			
+
 			UpdateErrors();
 		}
 
 		private void UpdateErrors() {
 			applyButton.ClearErrors();
-			
+
 			if (!TryGetLootTable(inventoryLootTableTextInput, out _) || !TryGetLootTable(dropLootTableTextInput, out _))
 				applyButton.AddError("SceneBuilder:LootToolUI/ErrorUnknownLootTable");
 		}
 
 		private bool TryGetLootTable(TextInputField textInput, out LootTableID lootTable) {
 			lootTable = LootTableID.Empty;
-			
+
 			var text = textInput.GetInputText();
 			return string.IsNullOrWhiteSpace(text) || Enum.TryParse(textInput.GetInputText(), out lootTable);
 		}

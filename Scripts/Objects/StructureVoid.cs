@@ -6,4 +6,4 @@ namespace SceneBuilder.Objects {
 			XScaler.gameObject.SetActive(!isHidden && StructureUI.IsHoldingAnyTool);
 		}
 	}
-} 
+}

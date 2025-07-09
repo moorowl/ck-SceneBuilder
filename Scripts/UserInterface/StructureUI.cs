@@ -4,6 +4,7 @@ using Pug.UnityExtensions;
 using PugMod;
 using SceneBuilder.Utilities;
 using UnityEngine;
+
 // ReSharper disable InconsistentNaming
 
 namespace SceneBuilder.UserInterface {
@@ -15,7 +16,7 @@ namespace SceneBuilder.UserInterface {
 		public static StructureFrameUI FrameUI { get; private set; }
 		public static StructureSaveUI SaveUI { get; private set; }
 		public static StructureLootUI LootUI { get; private set; }
-		
+
 		private Transform _frameRenderAnchor;
 		private bool _isSelectingPinB;
 		private bool _isDraggingPinA;
@@ -25,7 +26,7 @@ namespace SceneBuilder.UserInterface {
 		public static bool IsHoldingLootTool { get; private set; }
 		public static bool IsHoldingVoid { get; private set; }
 		public static bool IsHoldingAnyTool => IsHoldingSaverTool || IsHoldingLootTool || IsHoldingVoid;
-		
+
 		private void Start() {
 			_frameRenderAnchor = Manager.camera.GetRenderAnchor();
 			FrameUI = Instantiate(framePrefab, _frameRenderAnchor).GetComponent<StructureFrameUI>();
@@ -47,14 +48,14 @@ namespace SceneBuilder.UserInterface {
 			IsHoldingSaverTool = heldObject == API.Authoring.GetObjectID(Constants.StructureSaverToolId);
 			IsHoldingLootTool = heldObject == API.Authoring.GetObjectID(Constants.StructureLootToolId);
 			IsHoldingVoid = heldObject == API.Authoring.GetObjectID(Constants.StructureVoidId);
-			
+
 			var input = Manager.input.singleplayerInputModule;
 			if (!SaveUI.IsShowing && !LootUI.IsShowing && Manager.ui.currentSelectedUIElement == null && !Manager.main.player.isInteractionBlocked && input.PrefersKeyboardAndMouse()) {
 				var mouseTilePosition = EntityMonoBehaviour.ToWorldFromRender(Manager.ui.mouse.GetMouseGameViewPosition()).RoundToInt2();
-				
+
 				if (IsHoldingSaverTool) {
 					FrameUI.PinPreview = mouseTilePosition;
-					
+
 					if (_isDraggingPinA)
 						FrameUI.PinA = mouseTilePosition;
 					if (_isSelectingPinB || _isDraggingPinB)
@@ -98,7 +99,7 @@ namespace SceneBuilder.UserInterface {
 
 				if (IsHoldingLootTool) {
 					FrameUI.PinPreview = mouseTilePosition;
-					
+
 					if (input.WasButtonPressedDownThisFrame(PlayerInput.InputType.UI_INTERACT))
 						LootUI.Show(mouseTilePosition);
 				}

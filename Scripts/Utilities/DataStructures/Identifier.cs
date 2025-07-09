@@ -6,7 +6,7 @@ namespace SceneBuilder.Utilities.DataStructures {
 		public readonly string Path;
 
 		private readonly string _asString;
-		
+
 		public Identifier(string ns, string path) {
 			Namespace = ns;
 			Path = path;
@@ -16,7 +16,7 @@ namespace SceneBuilder.Utilities.DataStructures {
 		public override string ToString() {
 			return _asString;
 		}
-		
+
 		public bool Equals(Identifier other) {
 			return Namespace == other.Namespace && Path == other.Path;
 		}
@@ -28,13 +28,13 @@ namespace SceneBuilder.Utilities.DataStructures {
 		public static implicit operator Identifier(string input) {
 			return TryParse(input, out var identifier) ? identifier : default;
 		}
-		
+
 		public static bool TryParse(string input, out Identifier identifier) {
 			identifier = default;
-			
+
 			if (string.IsNullOrEmpty(input))
 				throw new ArgumentException();
-    
+
 			var parts = input.Split(':', 2);
 			if (parts.Length != 2 || string.IsNullOrEmpty(parts[0]) || string.IsNullOrEmpty(parts[1]))
 				return false;

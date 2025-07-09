@@ -20,13 +20,13 @@ namespace SceneBuilder.Scenes {
 
 			public void Execute(in DungeonAreaCD dungeon, in DynamicBuffer<DungeonReplaceObjectsBuffer> replacementRules, ref DynamicBuffer<DungeonSpawnedObjectBuffer> spawnObjects) {
 				var random = new Random(dungeon.seed ^ 0xCD86609Cu);
-				
+
 				foreach (var replacementRule in replacementRules) {
 					var randomIndex = GetRandomIndex(ref random, replacementRule.accumulatedVariationProbability);
 					var replaceWithVariations = replacementRule.replaceWithVariations;
 					var variation = replaceWithVariations.Value[randomIndex];
 					var primaryPrefabEntity = PugDatabase.GetPrimaryPrefabEntity(replacementRule.replaceWithID, Database, variation);
-					
+
 					for (var i = 0; i < spawnObjects.Length; i++) {
 						ref var spawnObject = ref spawnObjects.ElementAt(i);
 						if (Matches(spawnObject.objectData, replacementRule)) {
@@ -54,7 +54,7 @@ namespace SceneBuilder.Scenes {
 			private static int GetRandomIndex(ref Random rng, BlobAssetReference<BlobArray<float>> normalizedWeights) {
 				ref var weights = ref normalizedWeights.Value;
 				var num = rng.NextFloat();
-				
+
 				for (var i = 0; i < normalizedWeights.Value.Length; i++) {
 					if (num < weights[i]) {
 						return i;
@@ -115,7 +115,7 @@ namespace SceneBuilder.Scenes {
 					occupiedPositions.Add(in dungeonObject.position);
 					TileAccessor.Clear(dungeonObject.position);
 				}
-				
+
 				var collisionFilter = new CollisionFilter {
 					BelongsTo = uint.MaxValue,
 					CollidesWith = 131921u
@@ -149,10 +149,10 @@ namespace SceneBuilder.Scenes {
 			public ComponentLookup<PaintableObjectCD> PaintableObjectLookup;
 			public ComponentLookup<DropsLootFromLootTableCD> DropsLootFromLootTableLookup;
 			public BufferLookup<DescriptionBuffer> DescriptionBufferLookup;
-			
+
 			public void Execute(in DungeonAreaCD dungeon, ref DynamicBuffer<DungeonSpawnedObjectBuffer> dungeonObjects) {
 				var random = new Random(dungeon.seed ^ 0xA74A613Bu);
-				
+
 				foreach (var dungeonObject in dungeonObjects) {
 					var objectData = dungeonObject.objectData;
 					if (dungeonObject.prefabEntity != Entity.Null) {
@@ -164,7 +164,7 @@ namespace SceneBuilder.Scenes {
 							variation = objectData.variation
 						});
 						Ecb.AddComponent<CustomSceneObjectCD>(entity);
-						
+
 						if (dungeonObject.optionalSceneIndex > -1 && dungeonObject.optionalInventoryOverrideIndex > -1) {
 							if (SceneLoader.IsRuntimeName(CustomSceneTable.Value.scenes[dungeonObject.optionalSceneIndex].sceneName)) {
 								ref var properties = ref SceneObjectPropertiesTable.Value.Scenes[dungeonObject.optionalSceneIndex];
@@ -181,9 +181,9 @@ namespace SceneBuilder.Scenes {
 									PaintableObjectLookup,
 									DropsLootFromLootTableLookup,
 									DescriptionBufferLookup
-								);	
+								);
 							}
-							
+
 							ref var inventoryOverride = ref CustomSceneTable.Value.scenes[dungeonObject.optionalSceneIndex].prefabInventoryOverrides[dungeonObject.optionalInventoryOverrideIndex];
 							InventoryOverrideUtility.ApplyInventoryOverridesIfPresent(entity, dungeonObject.prefabEntity, ref inventoryOverride, Ecb, AddRandomLootLookup, ContainedBufferLookup, Database);
 						}
@@ -212,12 +212,12 @@ namespace SceneBuilder.Scenes {
 				dungeonObjects.Clear();
 			}
 		}
-		
+
 		private bool _hasLazyInitialized;
 		private EntityArchetype _waterSpreadingArchetype;
 		private BiomeLookup _biomeLookup;
 		private TileAccessor _tileAccessor;
-		
+
 		public void OnCreate(ref SystemState state) {
 			state.RequireForUpdate<SceneObjectPropertiesTable>();
 			state.RequireForUpdate<PhysicsWorldSingleton>();
@@ -229,10 +229,10 @@ namespace SceneBuilder.Scenes {
 			state.RequireForUpdate<SubMapRegistry>();
 			state.RequireForUpdate(SystemAPI.QueryBuilder().WithAny<BiomeRangesCD, BiomeSamplesCD>().Build());
 			state.RequireForUpdate<DungeonAreaCD>();
-			
+
 			_waterSpreadingArchetype = state.EntityManager.CreateArchetype(typeof(WaterSpreaderCD));
 		}
-		
+
 		public void OnStartRunning(ref SystemState state) {
 			if (!_hasLazyInitialized) {
 				_hasLazyInitialized = true;
@@ -240,7 +240,7 @@ namespace SceneBuilder.Scenes {
 				_tileAccessor = new TileAccessor(ref state, isReadOnly: false);
 			}
 		}
-		
+
 		public void OnDestroy(ref SystemState state) {
 			if (_hasLazyInitialized)
 				_biomeLookup.Dispose();
@@ -275,7 +275,7 @@ namespace SceneBuilder.Scenes {
 				Ecb = ecb
 			};
 			state.Dependency = enableAreaJob.Schedule(_query_548494060_, state.Dependency);
-			
+
 			var clearAreaJob = new ClearAreaJob {
 				Ecb = ecb,
 				TileAccessor = _tileAccessor,
