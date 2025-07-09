@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Pug.UnityExtensions;
 using PugMod;
+using PugProperties;
 using SceneBuilder.Scenes;
 using SceneBuilder.Utilities.DataStructures;
 using Unity.Collections;
@@ -90,10 +91,7 @@ namespace SceneBuilder.Utilities {
 		}
 
 		public static string GetObjectIdName(ObjectID id) {
-			if (!API.Authoring.ObjectProperties.TryGetPropertyString(id, "name", out var objectIdAsString))
-				objectIdAsString = id.ToString();
-
-			return objectIdAsString;
+			return API.Authoring.ObjectProperties.GetPropertyString(id, PropertyID.name) ?? id.ToString();
 		}
 		
 		public static bool TryFindMatchingPrefab(string id, int variation, out GameObject prefab) {
