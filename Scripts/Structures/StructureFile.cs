@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using Pug.UnityExtensions;
+using PugProperties;
 using PugTilemap;
 using SceneBuilder.Utilities;
 using SceneBuilder.Utilities.DataStructures;
@@ -19,12 +20,12 @@ using API = PugMod.API;
 
 namespace SceneBuilder.Structures {
 	public class StructureFile {
-		private static readonly HashSet<ObjectID> ObjectsToRemove = new() {
-			ObjectID.DroppedItem,
-			ObjectID.TheCore
+		private static readonly HashSet<string> ObjectsToRemove = new() {
+			nameof(ObjectID.DroppedItem),
+			nameof(ObjectID.TheCore)
 		};
-		private static readonly Dictionary<ObjectID, ObjectID> ObjectsToReplace = new() {
-			{ ObjectID.PlayerGrave, ObjectID.Gravestone }
+		private static readonly Dictionary<string, string> ObjectsToReplace = new() {
+			{ nameof(ObjectID.PlayerGrave), nameof(ObjectID.Gravestone) }
 		};
 		private static readonly HashSet<TileType> TileTypesToRemove = new() {
 			TileType.__illegal__,
@@ -121,20 +122,20 @@ namespace SceneBuilder.Structures {
 		public static class Converter {
 			public static void Validate(StructureFile structureFile) {
 				structureFile.Objects.RemoveAll(objectData => {
-					if (ObjectsToRemove.Contains(API.Authoring.GetObjectID(objectData.Id)) || !Utils.TryFindMatchingPrefab(objectData.Id, objectData.Variation, out _)) {
+					if (ObjectsToRemove.Contains(objectData.Id) || !Utils.TryFindMatchingPrefab(objectData.Id, objectData.Variation, out _)) {
 						Utils.Log($"(Validation) Removing invalid object {objectData.Id}");
 						return true;
 					}
 					return false;
 				});
 				structureFile.Objects.ForEach(objectData => {
-					var id = API.Authoring.GetObjectID(objectData.Id);
+					var id = objectData.Id;
 					var replacementId = ObjectsToReplace.GetValueOrDefault(id, id);
 				
 					if (id != replacementId)
 						Utils.Log($"(Validation) Replacing object {id} with {replacementId}");
 				
-					objectData.Id = replacementId.ToString();
+					objectData.Id = replacementId;
 				});
 			
 				structureFile.Tiles.RemoveAll(tile => {
@@ -352,7 +353,7 @@ namespace SceneBuilder.Structures {
 
 					if (!isCreature && (EntityUtility.HasComponentData<ContainedObjectsBuffer>(entity, API.Server.World) || EntityUtility.HasComponentData<DropsLootFromLootTableCD>(entity, API.Server.World)))
 						optionalDataEntry = DataToolUtils.GetDataAt(transform.RoundToInt2(), true);
-
+					
 					if (objectData.objectID != structureVoidId) {
 						objects.Add(new ObjectData {
 							Id = Utils.GetObjectIdName(objectData.objectID),
