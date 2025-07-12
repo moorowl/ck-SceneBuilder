@@ -2,6 +2,7 @@
 	public enum StructureCommand {
 		Save,
 		Place,
-		SetData
+		SetData,
+		CreateScenesMod
 	}
 }

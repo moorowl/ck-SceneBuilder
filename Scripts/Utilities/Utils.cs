@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using Pug.UnityExtensions;
 using PugMod;
@@ -25,6 +26,33 @@ namespace SceneBuilder.Utilities {
 
 		public static void Log(Exception exception) {
 			Debug.LogException(exception);
+		}
+
+		public static bool CreateScenesMod(string name) {
+			try {
+				var path = $"{Constants.InternalName}/Content/{name}";
+				if (API.ConfigFilesystem.DirectoryExists(name))
+					return false;
+
+				API.ConfigFilesystem.CreateDirectory($"{path}/Data/SceneBuilder/Scenes");
+				API.ConfigFilesystem.CreateDirectory($"{path}/Data/SceneBuilder/Structures");
+
+				var modMetadata = new ModMetadata {
+					guid = Guid.NewGuid().ToString("N"),
+					name = name,
+					files = new List<ModFile>(),
+					disableScripts = true,
+					disableHarmonyPatching = true,
+					requiredOn = ModMetadata.ModExistsOn.Server
+				};
+				API.ConfigFilesystem.Write($"{path}/ModManifest.json", Encoding.UTF8.GetBytes(JsonUtility.ToJson(modMetadata, prettyPrint: true)));
+
+				return true;
+			} catch (Exception ex) {
+				Log($"Error creating scenes mod named {name}");
+				Log(ex);
+			}
+			return false;
 		}
 
 		public static bool IsContainedObjectEmpty(ContainedObjectsBuffer containedObject) {

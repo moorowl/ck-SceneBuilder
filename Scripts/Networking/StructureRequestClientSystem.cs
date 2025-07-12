@@ -49,6 +49,13 @@ namespace SceneBuilder.Networking {
 			});
 		}
 
+		public void CreateScenesMod(string name) {
+			_rpcQueue.Enqueue(new StructureRequest {
+				Command = StructureCommand.CreateScenesMod,
+				String0 = name
+			});
+		}
+
 		protected override void OnUpdate() {
 			var ecb = CreateCommandBuffer();
 

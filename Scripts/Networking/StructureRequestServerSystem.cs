@@ -17,6 +17,11 @@ namespace SceneBuilder.Networking {
 			Entities.ForEach((Entity rpcEntity, in StructureRequest rpc, in ReceiveRpcCommandRequest req) => {
 					ecb.DestroyEntity(rpcEntity);
 
+					var playerGhost = SystemAPI.GetComponent<PlayerGhost>(req.SourceConnection);
+					var isAdmin = playerGhost.adminPrivileges >= 1;
+					if (!isAdmin)
+						return;
+					
 					switch (rpc.Command) {
 						case StructureCommand.Save:
 							StructureFile.Saver.SaveStructure(rpc.String0.ToString(), rpc.Position0, rpc.Position1);
@@ -34,6 +39,9 @@ namespace SceneBuilder.Networking {
 								InventoryLootTable = (LootTableID) rpc.Position1.x,
 								DropLootTable = (LootTableID) rpc.Position1.y,
 							});
+							break;
+						case StructureCommand.CreateScenesMod:
+							Utils.CreateScenesMod(rpc.String0.ToString());
 							break;
 						default:
 							throw new NotImplementedException();

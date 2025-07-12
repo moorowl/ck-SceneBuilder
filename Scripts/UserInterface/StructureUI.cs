@@ -43,11 +43,16 @@ namespace SceneBuilder.UserInterface {
 			var player = Manager.main.player;
 			if (player == null)
 				return;
+			
+			var isAdmin = player.adminPrivileges >= 1;
 
-			var heldObject = player.GetHeldObject().objectID;
+			var heldObject = isAdmin ? ObjectID.None : player.GetHeldObject().objectID;
 			IsHoldingSaverTool = heldObject == API.Authoring.GetObjectID(Constants.StructureSaverToolId);
 			IsHoldingLootTool = heldObject == API.Authoring.GetObjectID(Constants.StructureLootToolId);
 			IsHoldingVoid = heldObject == API.Authoring.GetObjectID(Constants.StructureVoidId);
+			
+			if (!isAdmin)
+				return;
 
 			var input = Manager.input.singleplayerInputModule;
 			if (!SaveUI.IsShowing && !LootUI.IsShowing && Manager.ui.currentSelectedUIElement == null && !Manager.main.player.isInteractionBlocked && input.PrefersKeyboardAndMouse()) {
