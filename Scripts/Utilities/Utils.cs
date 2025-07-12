@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -27,34 +26,7 @@ namespace SceneBuilder.Utilities {
 		public static void Log(Exception exception) {
 			Debug.LogException(exception);
 		}
-
-		public static bool CreateScenesMod(string name) {
-			try {
-				var path = $"{Constants.InternalName}/Content/{name}";
-				if (API.ConfigFilesystem.DirectoryExists(name))
-					return false;
-
-				API.ConfigFilesystem.CreateDirectory($"{path}/Data/SceneBuilder/Scenes");
-				API.ConfigFilesystem.CreateDirectory($"{path}/Data/SceneBuilder/Structures");
-
-				var modMetadata = new ModMetadata {
-					guid = Guid.NewGuid().ToString("N"),
-					name = name,
-					files = new List<ModFile>(),
-					disableScripts = true,
-					disableHarmonyPatching = true,
-					requiredOn = ModMetadata.ModExistsOn.Server
-				};
-				API.ConfigFilesystem.Write($"{path}/ModManifest.json", Encoding.UTF8.GetBytes(JsonUtility.ToJson(modMetadata, prettyPrint: true)));
-
-				return true;
-			} catch (Exception ex) {
-				Log($"Error creating scenes mod named {name}");
-				Log(ex);
-			}
-			return false;
-		}
-
+		
 		public static bool IsContainedObjectEmpty(ContainedObjectsBuffer containedObject) {
 			return containedObject.objectID == ObjectID.None || (containedObject.amount <= 0 && !PugDatabase.AmountIsDurabilityOrFullnessOrXp(containedObject.objectID, containedObject.variation));
 		}
@@ -69,11 +41,11 @@ namespace SceneBuilder.Utilities {
 		private static readonly Regex ModFilesRegex = new(@$"^(?:.*)\/Data\/{Constants.InternalName}\/([^\/]+)\/([^\/]+)\/(.*)\.json$");
 
 		public static void LoadFilesFromBundles(string dataType, Action<Identifier, byte[]> callback) {
-			// Load from local files
+			/* Load from local files
 			if (!API.ConfigFilesystem.DirectoryExists(Constants.InternalName))
 				API.ConfigFilesystem.CreateDirectory(Constants.InternalName);
 			foreach (var path in API.ConfigFilesystem.GetFiles(Constants.InternalName)) {
-				var match = LocalFilesRegex.Match(path);
+				var match = ModFilesRegex.Match(path);
 				if (!match.Success || match.Groups.Count < 3)
 					continue;
 
@@ -82,7 +54,7 @@ namespace SceneBuilder.Utilities {
 
 				var identifier = new Identifier(match.Groups[1].Value, match.Groups[3].Value);
 				callback(identifier, API.ConfigFilesystem.Read(path));
-			}
+			}*/
 
 			// Load from mod bundles
 			foreach (var mod in API.ModLoader.LoadedMods) {
@@ -100,7 +72,7 @@ namespace SceneBuilder.Utilities {
 					}
 				}
 
-				var directory = API.ModLoader.GetDirectory(mod.ModId);
+				/*var directory = API.ModLoader.GetDirectory(mod.ModId);
 				if (directory != null) {
 					var paths = Directory.GetFiles(directory, "*.json", SearchOption.AllDirectories).Select(path => path.Replace(@"\", @"/"));
 					foreach (var path in paths) {
@@ -114,7 +86,7 @@ namespace SceneBuilder.Utilities {
 						var identifier = new Identifier(match.Groups[1].Value, match.Groups[3].Value);
 						callback(identifier, File.ReadAllBytes(path));
 					}
-				}
+				}*/
 			}
 		}
 

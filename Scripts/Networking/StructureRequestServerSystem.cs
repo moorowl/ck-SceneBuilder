@@ -40,9 +40,6 @@ namespace SceneBuilder.Networking {
 								DropLootTable = (LootTableID) rpc.Position1.y,
 							});
 							break;
-						case StructureCommand.CreateScenesMod:
-							Utils.CreateScenesMod(rpc.String0.ToString());
-							break;
 						default:
 							throw new NotImplementedException();
 					}

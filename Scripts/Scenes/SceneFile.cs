@@ -84,7 +84,7 @@ namespace SceneBuilder.Scenes {
 				canFlipX = supportsFlip && (Generation.CanFlip is FlipDirection.Horizontal or FlipDirection.HorizontalAndVertical),
 				canFlipY = supportsFlip && (Generation.CanFlip is FlipDirection.Vertical or FlipDirection.HorizontalAndVertical),
 				hasCenter = false,
-				center = new int2(),
+				center = new int2(boundsSize.x / 2, boundsSize.y / 2),
 				boundsSize = boundsSize,
 				radius = math.ceil(math.max(boundsSize.x, boundsSize.y) / 2f) + 1f,
 				maps = maps,
