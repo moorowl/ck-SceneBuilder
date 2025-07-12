@@ -335,17 +335,41 @@ namespace SceneBuilder.Structures {
 				var structureVoidId = API.Authoring.GetObjectID(Constants.StructureVoidId);
 				var lootToolId = API.Authoring.GetObjectID(Constants.StructureLootToolId);
 
-				foreach (var (objectData, transform, entity) in Utils.ObjectQuery(collisionWorld, API.Server.World, position, size)) {
+				var query = Utils.ObjectQuery(collisionWorld, API.Server.World, position, size);
+				var dataEntries = new Dictionary<int2, DataToolUtils.DataEntry>();
+
+				foreach (var (objectData, transform, _) in query) {
+					if (objectData.objectID != lootToolId)
+						continue;
+
+					dataEntries.TryAdd(transform.RoundToInt2(), DataToolUtils.GetDataAt(transform.RoundToInt2(), true));
+				}
+
+				foreach (var (objectData, transform, entity) in query) {
 					if (EntityUtility.HasComponentData<DontSerializeCD>(entity, API.Server.World) || objectData.objectID == lootToolId)
 						continue;
 
-					DataToolUtils.DataEntry? optionalDataEntry = null;
-
+					var tilePosition = transform.RoundToInt2();
 					var objectType = EntityUtility.GetComponentData<ObjectTypeCD>(entity, API.Server.World).Value;
 					var isCreature = objectType is ObjectType.Creature or ObjectType.Critter;
 
-					if (!isCreature && (EntityUtility.HasComponentData<ContainedObjectsBuffer>(entity, API.Server.World) || EntityUtility.HasComponentData<DropsLootFromLootTableCD>(entity, API.Server.World)))
-						optionalDataEntry = DataToolUtils.GetDataAt(transform.RoundToInt2(), true);
+					DataToolUtils.DataEntry? optionalDataEntry = null;
+
+					if (!isCreature && (EntityUtility.HasComponentData<ContainedObjectsBuffer>(entity, API.Server.World) || EntityUtility.HasComponentData<DropsLootFromLootTableCD>(entity, API.Server.World))) {
+						var objectInfo = PugDatabase.GetObjectInfo(objectData.objectID, objectData.variation);
+						var objectSize = objectInfo.prefabTileSize.ToInt2();
+						var objectOffset = objectInfo.prefabCornerOffset.ToInt2();
+						if (EntityUtility.TryGetComponentData<DirectionCD>(entity, API.Server.World, out var rotation))
+							rotation.GetPrefabOffsetAndTileSize(objectOffset, objectSize, out objectOffset, out objectSize);
+						
+						for (var j = tilePosition.y + objectOffset.y; j < tilePosition.y + objectSize.y + objectOffset.y; j++) {
+							for (var k = tilePosition.x + objectOffset.x; k < tilePosition.x + objectSize.x + objectOffset.x; k++) {
+								if (dataEntries.TryGetValue(new int2(k, j), out var entry)) {
+									optionalDataEntry = entry;
+								}
+							}
+						}
+					}
 
 					if (objectData.objectID != structureVoidId) {
 						objects.Add(new ObjectData {
@@ -355,7 +379,7 @@ namespace SceneBuilder.Structures {
 							Properties = GetObjectProperties(objectData, entity, optionalDataEntry)
 						});
 					} else {
-						structureVoidPositions.Add(transform.RoundToInt2() - position);
+						structureVoidPositions.Add(tilePosition - position);
 					}
 				}
 
