@@ -43,14 +43,13 @@ namespace SceneBuilder.UserInterface {
 			var player = Manager.main.player;
 			if (player == null)
 				return;
-			
-			var isAdmin = player.adminPrivileges >= 1;
 
-			var heldObject = isAdmin ? ObjectID.None : player.GetHeldObject().objectID;
+			var heldObject = player.GetHeldObject().objectID;
 			IsHoldingSaverTool = heldObject == API.Authoring.GetObjectID(Constants.StructureSaverToolId);
 			IsHoldingLootTool = heldObject == API.Authoring.GetObjectID(Constants.StructureLootToolId);
 			IsHoldingVoid = heldObject == API.Authoring.GetObjectID(Constants.StructureVoidId);
 			
+			var isAdmin = player.adminPrivileges >= 1;
 			if (!isAdmin)
 				return;
 
@@ -116,7 +115,7 @@ namespace SceneBuilder.UserInterface {
 			[HarmonyPatch(typeof(SendClientInputSystem), "PlayerInteractionBlocked")]
 			[HarmonyPostfix]
 			private static void PlayerInteractionBlocked(SendClientInputSystem __instance, ref bool __result) {
-				if (Manager.ui.currentSelectedUIElement == null && (IsHoldingSaverTool || IsHoldingLootTool))
+				if (Manager.ui.currentSelectedUIElement == null && (IsHoldingSaverTool || IsHoldingLootTool || (IsHoldingVoid && Manager.main.player.adminPrivileges < 1)))
 					__result = true;
 			}
 		}
