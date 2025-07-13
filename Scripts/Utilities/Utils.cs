@@ -118,7 +118,7 @@ namespace SceneBuilder.Utilities {
 				}
 			}
 
-			return false;
+			return variation > 0 && TryFindMatchingPrefab(id, 0, out prefab);
 		}
 
 		public static void ApplySceneObjectProperties(EntityCommandBuffer ecb, Entity entity, Entity authoringEntity, ObjectDataCD authoringObjectData, ref SceneObjectPropertiesBlob properties, int prefabIndex, int2 flipDirection, ComponentLookup<DirectionBasedOnVariationCD> directionBasedOnVariationLookup, ComponentLookup<DirectionCD> directionLookup, ComponentLookup<PaintableObjectCD> paintableObjectLookup, ComponentLookup<DropsLootFromLootTableCD> dropsLootFromTableLookup, BufferLookup<DescriptionBuffer> descriptionLookup) {
