@@ -1,4 +1,5 @@
 ﻿using Pug.UnityExtensions;
+using PugProperties;
 using PugTilemap;
 using PugWorldGen;
 using SceneBuilder.Utilities;
@@ -149,6 +150,7 @@ namespace SceneBuilder.Scenes {
 			public ComponentLookup<PaintableObjectCD> PaintableObjectLookup;
 			public ComponentLookup<DropsLootFromLootTableCD> DropsLootFromLootTableLookup;
 			public BufferLookup<DescriptionBuffer> DescriptionBufferLookup;
+			public ComponentLookup<ObjectPropertiesCD> ObjectPropertiesLookup;
 
 			public void Execute(in DungeonAreaCD dungeon, ref DynamicBuffer<DungeonSpawnedObjectBuffer> dungeonObjects) {
 				var random = new Random(dungeon.seed ^ 0xA74A613Bu);
@@ -180,7 +182,8 @@ namespace SceneBuilder.Scenes {
 									DirectionLookup,
 									PaintableObjectLookup,
 									DropsLootFromLootTableLookup,
-									DescriptionBufferLookup
+									DescriptionBufferLookup,
+									ObjectPropertiesLookup
 								);
 							}
 
@@ -300,7 +303,8 @@ namespace SceneBuilder.Scenes {
 				DirectionLookup = SystemAPI.GetComponentLookup<DirectionCD>(),
 				PaintableObjectLookup = SystemAPI.GetComponentLookup<PaintableObjectCD>(),
 				DropsLootFromLootTableLookup = SystemAPI.GetComponentLookup<DropsLootFromLootTableCD>(),
-				DescriptionBufferLookup = SystemAPI.GetBufferLookup<DescriptionBuffer>()
+				DescriptionBufferLookup = SystemAPI.GetBufferLookup<DescriptionBuffer>(),
+				ObjectPropertiesLookup = SystemAPI.GetComponentLookup<ObjectPropertiesCD>()
 			};
 			state.Dependency = spawnObjectsJob.Schedule(_query_548494060_3, state.Dependency);
 		}

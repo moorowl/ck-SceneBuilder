@@ -30,7 +30,8 @@ namespace SceneBuilder.Scenes {
 					continue;
 				if (!StructureLoader.Instance.TryGetStructure(sceneFile.Structure, out var structureFile))
 					continue;
-
+				
+				var prefabVariations = builder.Allocate(ref objectProperties[sceneIndex].PrefabVariations, structureFile.Objects.Count);
 				var prefabAmounts = builder.Allocate(ref objectProperties[sceneIndex].PrefabAmounts, structureFile.Objects.Count);
 				var prefabDirections = builder.Allocate(ref objectProperties[sceneIndex].PrefabDirections, structureFile.Objects.Count);
 				var prefabColors = builder.Allocate(ref objectProperties[sceneIndex].PrefabColors, structureFile.Objects.Count);
@@ -41,6 +42,7 @@ namespace SceneBuilder.Scenes {
 					var objectData = structureFile.Objects[i];
 					var properties = objectData.Properties;
 
+					prefabVariations[i] = objectData.Variation;
 					prefabAmounts[i] = properties.Amount ?? -1;
 					prefabDirections[i] = properties.Direction ?? new int3(0, 0, -1);
 					prefabColors[i] = properties.Color ?? PaintableColor.Unpainted;

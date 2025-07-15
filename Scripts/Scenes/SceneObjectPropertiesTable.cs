@@ -8,6 +8,7 @@ namespace SceneBuilder.Scenes {
 	}
 
 	public struct SceneObjectPropertiesBlob {
+		public BlobArray<int> PrefabVariations;
 		public BlobArray<int> PrefabAmounts;
 		public BlobArray<int3> PrefabDirections;
 		public BlobArray<PaintableColor> PrefabColors;

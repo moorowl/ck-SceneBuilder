@@ -1,4 +1,5 @@
 ﻿using Pug.UnityExtensions;
+using PugProperties;
 using PugTilemap;
 using PugWorldGen;
 using SceneBuilder.Utilities;
@@ -106,7 +107,8 @@ namespace SceneBuilder.Scenes {
 							SystemAPI.GetComponentLookup<DirectionCD>(),
 							SystemAPI.GetComponentLookup<PaintableObjectCD>(),
 							SystemAPI.GetComponentLookup<DropsLootFromLootTableCD>(),
-							SystemAPI.GetBufferLookup<DescriptionBuffer>()
+							SystemAPI.GetBufferLookup<DescriptionBuffer>(),
+							SystemAPI.GetComponentLookup<ObjectPropertiesCD>()
 						);
 
 						InventoryOverrideUtility.ApplyInventoryOverridesIfPresent(

@@ -121,28 +121,33 @@ namespace SceneBuilder.Utilities {
 			return variation > 0 && TryFindMatchingPrefab(id, 0, out prefab);
 		}
 
-		public static void ApplySceneObjectProperties(EntityCommandBuffer ecb, Entity entity, Entity authoringEntity, ObjectDataCD authoringObjectData, ref SceneObjectPropertiesBlob properties, int prefabIndex, int2 flipDirection, ComponentLookup<DirectionBasedOnVariationCD> directionBasedOnVariationLookup, ComponentLookup<DirectionCD> directionLookup, ComponentLookup<PaintableObjectCD> paintableObjectLookup, ComponentLookup<DropsLootFromLootTableCD> dropsLootFromTableLookup, BufferLookup<DescriptionBuffer> descriptionLookup) {
+		public static void ApplySceneObjectProperties(EntityCommandBuffer ecb, Entity entity, Entity authoringEntity, ObjectDataCD authoringObjectData, ref SceneObjectPropertiesBlob properties, int prefabIndex, int2 flipDirection, ComponentLookup<DirectionBasedOnVariationCD> directionBasedOnVariationLookup, ComponentLookup<DirectionCD> directionLookup, ComponentLookup<PaintableObjectCD> paintableObjectLookup, ComponentLookup<DropsLootFromLootTableCD> dropsLootFromTableLookup, BufferLookup<DescriptionBuffer> descriptionLookup, ComponentLookup<ObjectPropertiesCD> objectPropertiesLookup) {
+			ref var prefabVariation = ref properties.PrefabVariations[prefabIndex];
 			ref var prefabAmount = ref properties.PrefabAmounts[prefabIndex];
 			ref var prefabDirection = ref properties.PrefabDirections[prefabIndex];
 			ref var prefabColor = ref properties.PrefabColors[prefabIndex];
 			ref var prefabDescription = ref properties.PrefabDescriptions[prefabIndex];
 			ref var prefabDropsLootTable = ref properties.PrefabDropsLootTable[prefabIndex];
 
-			if (prefabAmount != authoringObjectData.amount) {
-				authoringObjectData.amount = prefabAmount;
-				ecb.SetComponent(entity, authoringObjectData);
-			}
+			var variationOverride = prefabVariation;
 
 			if (directionBasedOnVariationLookup.HasComponent(authoringEntity)) {
-				var flippedVariation = DirectionBasedOnVariationCD.GetFlippedVariation(authoringObjectData.variation, flipDirection.x == -1, flipDirection.y == -1);
-				if (flippedVariation != authoringObjectData.variation) {
-					authoringObjectData.variation = flippedVariation;
-					ecb.SetComponent(entity, authoringObjectData);
-				}
+				variationOverride = DirectionBasedOnVariationCD.GetFlippedVariation(variationOverride, flipDirection.x == -1, flipDirection.y == -1);
+			} else if (objectPropertiesLookup.TryGetComponent(authoringEntity, out var objectProperties) && objectProperties.Has(PropertyID.PlaceableObject.hasVariationsThatCanBePlacedOnWalls)) {
+				var wallVariationsStartIndex = objectProperties.Has(PropertyID.PlaceableObject.wallSideVariationStartsOnIndex1) ? 1 : 0;
+				// objects with wallSideVariationStartsOnIndex1 use variation 0 as a standing state
+				if (variationOverride >= wallVariationsStartIndex)
+					variationOverride = GetFlippedWallObjectVariation(variationOverride - wallVariationsStartIndex, flipDirection.x == -1, flipDirection.y == -1) + wallVariationsStartIndex;
 			} else if (directionLookup.HasComponent(authoringEntity)) {
 				ecb.SetComponent(entity, new DirectionCD {
 					direction = new float3(prefabDirection.x * flipDirection.x, prefabDirection.y, prefabDirection.z * flipDirection.y)
 				});
+			}
+			
+			if (variationOverride != authoringObjectData.variation || prefabAmount != authoringObjectData.amount) {
+				authoringObjectData.variation = variationOverride;
+				authoringObjectData.amount = prefabAmount;
+				ecb.SetComponent(entity, authoringObjectData);
 			}
 
 			if (paintableObjectLookup.HasComponent(authoringEntity)) {
@@ -165,6 +170,27 @@ namespace SceneBuilder.Utilities {
 					lootTableID = prefabDropsLootTable
 				});
 			}
+		}
+
+		private static int GetFlippedWallObjectVariation(int variation, bool flippedX, bool flippedY) {
+			const int backVariation = 0;
+			const int rightVariation = 1;
+			const int frontVariation = 2;
+			const int leftVariation = 3;
+			
+			if (flippedY && variation == backVariation)
+				return frontVariation;
+
+			if (flippedX && variation == rightVariation)
+				return leftVariation;
+
+			if (flippedY && variation == frontVariation)
+				return backVariation;
+
+			if (flippedX && variation == leftVariation)
+				return rightVariation;
+
+			return variation;
 		}
 
 		public static List<(ObjectDataCD ObjectData, float3 Position, Entity Entity)> ObjectQuery(CollisionWorld collisionWorld, World ecsWorld, int2 position, int2 size) {
