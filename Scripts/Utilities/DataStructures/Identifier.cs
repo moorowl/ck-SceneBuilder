@@ -26,6 +26,9 @@ namespace SceneBuilder.Utilities.DataStructures {
 		}
 
 		public static implicit operator Identifier(string input) {
+			if (input == null)
+				return default;
+			
 			return TryParse(input, out var identifier) ? identifier : default;
 		}
 

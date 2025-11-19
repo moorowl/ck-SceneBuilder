@@ -95,7 +95,15 @@ namespace SceneBuilder.Scenes {
 
 		public bool TryGetFromRuntimeName(FixedString64Bytes name, out SceneFile scene) {
 			scene = null;
-			return _runtimeSceneNameMap.TryGetValue(name, out var identifier) && TryGet(identifier, out scene);
+			return TryGetIdFromRuntimeName(name, out var identifier) && TryGet(identifier, out scene);
+		}
+		
+		public bool TryGetIdFromRuntimeName(FixedString64Bytes name, out Identifier identifier) {
+			if (_runtimeSceneNameMap.TryGetValue(name, out identifier))
+				return true;
+			
+			identifier = default;
+			return false;
 		}
 
 		public static string GetRuntimeName(Identifier id) {
@@ -138,26 +146,29 @@ namespace SceneBuilder.Scenes {
 			[HarmonyPatch(typeof(DungeonCustomScenesAuthoring), nameof(DungeonCustomScenesAuthoring.GetPersistentName))]
 			[HarmonyPostfix]
 			public static void GetPersistentName(SceneReference scene, ref ReadOnlySpan<char> __result) {
-				if (scene.ScenePath.StartsWith("#") && scene.ScenePath.Length >= 4 && Identifier.TryParse(scene.ScenePath.Substring(1), out var id))
-					__result = GetRuntimeName(id).AsSpan();
+				if (scene.ScenePath.StartsWith("#") && scene.ScenePath.Length >= 4 && Identifier.TryParse(scene.ScenePath.Substring(1), out var idParsed))
+					__result = GetRuntimeName(idParsed).AsSpan();
 			}
 
 			[HarmonyPatch(typeof(CustomScenesDataTable), nameof(CustomScenesDataTable.TryFindSceneByName))]
 			[HarmonyPrefix]
 			public static void TryFindSceneByName(CustomScenesDataTable __instance, ref ReadOnlySpan<char> sceneName) {
-				if (sceneName.StartsWith("#") && sceneName.Length >= 4 && Identifier.TryParse(sceneName[1..].ToString(), out var id))
+				var sceneNameAsString = sceneName.ToString();
+				
+				if (sceneNameAsString.StartsWith("#") && sceneName.Length >= 4 && Identifier.TryParse(sceneNameAsString[1..], out var id))
 					sceneName = GetRuntimeName(id).AsSpan();
 			}
 
 			[HarmonyPatch(typeof(SceneReference), "get_SceneName")]
-			[HarmonyPrefix]
-			public static bool get_SceneName(SceneReference __instance, ref string __result) {
-				if (__instance.ScenePath.StartsWith("#") && __instance.ScenePath.Length >= 4 && Identifier.TryParse(__instance.ScenePath.Substring(1), out var id)) {
-					__result = GetRuntimeName(id);
-					return false;
+			[HarmonyPostfix]
+			public static void get_SceneName(SceneReference __instance, ref string __result) {
+				if (__instance.ScenePath.StartsWith("#") && __instance.ScenePath.Length >= 4 && Identifier.TryParse(__instance.ScenePath.Substring(1), out var idParsed)) {
+					__result = GetRuntimeName(idParsed);
+					return;
 				}
 
-				return true;
+				if (IsRuntimeName(__instance.ScenePath) && Instance.TryGetIdFromRuntimeName(__instance.ScenePath, out var idFromRuntime))
+					__result = idFromRuntime.ToString();
 			}
 		}
 	}
