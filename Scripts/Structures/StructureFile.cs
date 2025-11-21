@@ -71,6 +71,8 @@ namespace SceneBuilder.Structures {
 
 			[JsonProperty("description")] public string Description { get; set; }
 
+			[JsonProperty("growthStage")] public int? GrowthStage { get; set; }
+			
 			[JsonProperty("inventory")] public List<InventoryItem> Inventory { get; set; }
 
 			[JsonProperty("inventoryLootTable")]
@@ -408,6 +410,9 @@ namespace SceneBuilder.Structures {
 					if (!string.IsNullOrWhiteSpace(text))
 						properties.Description = text;
 				}
+
+				if (EntityUtility.TryGetComponentData<GrowingCD>(entity, world, out var growingData))
+					properties.GrowthStage = growingData.currentStage;
 
 				if (EntityUtility.TryGetBuffer<ContainedObjectsBuffer>(entity, world, out var containedObjects)) {
 					properties.Inventory = new List<InventoryItem>();

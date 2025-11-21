@@ -36,6 +36,7 @@ namespace SceneBuilder.Scenes {
 				var prefabDirections = builder.Allocate(ref objectProperties[sceneIndex].PrefabDirections, structureFile.Objects.Count);
 				var prefabColors = builder.Allocate(ref objectProperties[sceneIndex].PrefabColors, structureFile.Objects.Count);
 				var prefabDescriptions = builder.Allocate(ref objectProperties[sceneIndex].PrefabDescriptions, structureFile.Objects.Count);
+				var prefabGrowthStages = builder.Allocate(ref objectProperties[sceneIndex].PrefabGrowthStages, structureFile.Objects.Count);
 				var prefabDropsLootTable = builder.Allocate(ref objectProperties[sceneIndex].PrefabDropsLootTable, structureFile.Objects.Count);
 
 				for (var i = 0; i < structureFile.Objects.Count; i++) {
@@ -47,6 +48,7 @@ namespace SceneBuilder.Scenes {
 					prefabDirections[i] = properties.Direction ?? new int3(0, 0, -1);
 					prefabColors[i] = properties.Color ?? PaintableColor.Unpainted;
 					prefabDescriptions[i] = properties.Description ?? string.Empty;
+					prefabGrowthStages[i] = properties.GrowthStage ?? -1;
 					prefabDropsLootTable[i] = properties.DropsLootTable.GetValueOrDefault((LootTableID) (-1));
 				}
 			}

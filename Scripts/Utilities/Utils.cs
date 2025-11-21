@@ -121,20 +121,24 @@ namespace SceneBuilder.Utilities {
 			return variation > 0 && TryFindMatchingPrefab(id, 0, out prefab);
 		}
 
-		public static void ApplySceneObjectProperties(EntityCommandBuffer ecb, Entity entity, Entity authoringEntity, ObjectDataCD authoringObjectData, ref SceneObjectPropertiesBlob properties, int prefabIndex, int2 flipDirection, ComponentLookup<DirectionBasedOnVariationCD> directionBasedOnVariationLookup, ComponentLookup<DirectionCD> directionLookup, ComponentLookup<PaintableObjectCD> paintableObjectLookup, ComponentLookup<DropsLootFromLootTableCD> dropsLootFromTableLookup, BufferLookup<DescriptionBuffer> descriptionLookup, ComponentLookup<ObjectPropertiesCD> objectPropertiesLookup) {
+		public static void ApplySceneObjectProperties(EntityCommandBuffer ecb, Entity entity, Entity authoringEntity, ObjectDataCD authoringObjectData, ref SceneObjectPropertiesBlob properties, int prefabIndex, int2 flipDirection, ComponentLookup<DirectionBasedOnVariationCD> directionBasedOnVariationLookup, ComponentLookup<DirectionCD> directionLookup, ComponentLookup<PaintableObjectCD> paintableObjectLookup, ComponentLookup<DropsLootFromLootTableCD> dropsLootFromTableLookup, BufferLookup<DescriptionBuffer> descriptionLookup, ComponentLookup<GrowingCD> growingLookup, ComponentLookup<ObjectPropertiesCD> objectPropertiesLookup) {
 			ref var prefabVariation = ref properties.PrefabVariations[prefabIndex];
 			ref var prefabAmount = ref properties.PrefabAmounts[prefabIndex];
 			ref var prefabDirection = ref properties.PrefabDirections[prefabIndex];
 			ref var prefabColor = ref properties.PrefabColors[prefabIndex];
 			ref var prefabDescription = ref properties.PrefabDescriptions[prefabIndex];
+			ref var prefabGrowthStage = ref properties.PrefabGrowthStages[prefabIndex];
 			ref var prefabDropsLootTable = ref properties.PrefabDropsLootTable[prefabIndex];
+
+			if (!objectPropertiesLookup.TryGetComponent(authoringEntity, out var objectPropertiesCD))
+				return;
 
 			var variationOverride = prefabVariation;
 
 			if (directionBasedOnVariationLookup.HasComponent(authoringEntity)) {
 				variationOverride = DirectionBasedOnVariationCD.GetFlippedVariation(variationOverride, flipDirection.x == -1, flipDirection.y == -1);
-			} else if (objectPropertiesLookup.TryGetComponent(authoringEntity, out var objectProperties) && objectProperties.Has(PropertyID.PlaceableObject.hasVariationsThatCanBePlacedOnWalls)) {
-				var wallVariationsStartIndex = objectProperties.Has(PropertyID.PlaceableObject.wallSideVariationStartsOnIndex1) ? 1 : 0;
+			} else if (objectPropertiesCD.Has(PropertyID.PlaceableObject.hasVariationsThatCanBePlacedOnWalls)) {
+				var wallVariationsStartIndex = objectPropertiesCD.Has(PropertyID.PlaceableObject.wallSideVariationStartsOnIndex1) ? 1 : 0;
 				// objects with wallSideVariationStartsOnIndex1 use variation 0 as a standing state
 				if (variationOverride >= wallVariationsStartIndex)
 					variationOverride = GetFlippedWallObjectVariation(variationOverride - wallVariationsStartIndex, flipDirection.x == -1, flipDirection.y == -1) + wallVariationsStartIndex;
@@ -163,6 +167,14 @@ namespace SceneBuilder.Utilities {
 						Value = prefabDescription[i]
 					});
 				}
+			}
+			
+			if (growingLookup.TryGetComponent(authoringEntity, out var existingGrowingCD)) {
+				// Default to highest stage if one isn't specified
+				existingGrowingCD.currentStage = prefabGrowthStage == -1 && objectPropertiesCD.TryGet<int>(PropertyID.Growing.highestStage, out var highestStage)
+					? highestStage
+					: prefabGrowthStage;
+				ecb.SetComponent(entity, existingGrowingCD);
 			}
 
 			if (dropsLootFromTableLookup.HasComponent(authoringEntity) && (int) prefabDropsLootTable > -1) {

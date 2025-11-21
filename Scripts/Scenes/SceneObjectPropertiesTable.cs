@@ -13,6 +13,7 @@ namespace SceneBuilder.Scenes {
 		public BlobArray<int3> PrefabDirections;
 		public BlobArray<PaintableColor> PrefabColors;
 		public BlobArray<FixedString128Bytes> PrefabDescriptions;
+		public BlobArray<int> PrefabGrowthStages;
 		public BlobArray<LootTableID> PrefabDropsLootTable;
 	}
 

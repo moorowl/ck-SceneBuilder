@@ -108,6 +108,7 @@ namespace SceneBuilder.Scenes {
 							SystemAPI.GetComponentLookup<PaintableObjectCD>(),
 							SystemAPI.GetComponentLookup<DropsLootFromLootTableCD>(),
 							SystemAPI.GetBufferLookup<DescriptionBuffer>(),
+							SystemAPI.GetComponentLookup<GrowingCD>(),
 							SystemAPI.GetComponentLookup<ObjectPropertiesCD>()
 						);
 

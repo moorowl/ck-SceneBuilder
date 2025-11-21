@@ -150,6 +150,7 @@ namespace SceneBuilder.Scenes {
 			public ComponentLookup<PaintableObjectCD> PaintableObjectLookup;
 			public ComponentLookup<DropsLootFromLootTableCD> DropsLootFromLootTableLookup;
 			public BufferLookup<DescriptionBuffer> DescriptionBufferLookup;
+			public ComponentLookup<GrowingCD> GrowingLookup;
 			public ComponentLookup<ObjectPropertiesCD> ObjectPropertiesLookup;
 
 			public void Execute(in DungeonAreaCD dungeon, ref DynamicBuffer<DungeonSpawnedObjectBuffer> dungeonObjects) {
@@ -183,6 +184,7 @@ namespace SceneBuilder.Scenes {
 									PaintableObjectLookup,
 									DropsLootFromLootTableLookup,
 									DescriptionBufferLookup,
+									GrowingLookup,
 									ObjectPropertiesLookup
 								);
 							}
@@ -304,6 +306,7 @@ namespace SceneBuilder.Scenes {
 				PaintableObjectLookup = SystemAPI.GetComponentLookup<PaintableObjectCD>(),
 				DropsLootFromLootTableLookup = SystemAPI.GetComponentLookup<DropsLootFromLootTableCD>(),
 				DescriptionBufferLookup = SystemAPI.GetBufferLookup<DescriptionBuffer>(),
+				GrowingLookup = SystemAPI.GetComponentLookup<GrowingCD>(),
 				ObjectPropertiesLookup = SystemAPI.GetComponentLookup<ObjectPropertiesCD>()
 			};
 			state.Dependency = spawnObjectsJob.Schedule(_query_548494060_3, state.Dependency);
