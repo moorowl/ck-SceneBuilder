@@ -1,16 +1,20 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using HarmonyLib;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
+using Pug.Conversion;
 using Pug.UnityExtensions;
+using PugMod;
 using PugTilemap;
 using SceneBuilder.Utilities;
 using SceneBuilder.Utilities.DataStructures;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
+using Unity.NetCode;
 using Unity.Physics;
 using UnityEngine;
 using API = PugMod.API;
@@ -108,7 +112,7 @@ namespace SceneBuilder.Structures {
 			[JsonProperty("positions", ItemConverterType = typeof(Converters.Int2))]
 			public List<int2> Positions { get; set; }
 		}
-
+		
 		public static class Converter {
 			public static void Validate(StructureFile structureFile) {
 				structureFile.Objects.RemoveAll(objectData => {
@@ -130,7 +134,7 @@ namespace SceneBuilder.Structures {
 				});
 
 				structureFile.Tiles.RemoveAll(tile => {
-					if (TileTypesToRemove.Contains(tile.TileType) || tile.Tileset < Tileset.Dirt || tile.Tileset >= Tileset.MAX_VALUE) {
+					if (TileTypesToRemove.Contains(tile.TileType)) {
 						Utils.Log($"(Validation) Removing invalid tile type {tile.TileType}");
 						return true;
 					}
@@ -195,21 +199,20 @@ namespace SceneBuilder.Structures {
 				neededTileTypes.Dispose();
 			}
 
-			public static void GetPrefabs(StructureFile structureFile, int sceneIndex, out List<GameObject> prefabs, out List<Vector3> prefabPositions, out List<CustomScenesDataTable.InventoryOverride> prefabInventoryOverrides) {
+			public static void GetPrefabs(StructureFile structureFile, int sceneIndex, out List<GameObject> prefabs, out List<Vector3> prefabPositions, out List<CustomScenesDataTable.InventoryOverride> prefabInventoryOverrides, out List<OptionalValue<PaintableColor>> prefabColors, out List<OptionalValue<float3>> prefabDirections) {
 				prefabs = new List<GameObject>();
 				prefabPositions = new List<Vector3>();
 				prefabInventoryOverrides = new List<CustomScenesDataTable.InventoryOverride>();
+				prefabColors = new List<OptionalValue<PaintableColor>>();
+				prefabDirections = new List<OptionalValue<float3>>();
 
 				foreach (var objectData in structureFile.Objects) {
 					if (!Utils.TryFindMatchingPrefab(objectData.Id, objectData.Variation, out var prefab))
 						continue;
 
-					prefabs.Add(prefab);
-					prefabPositions.Add(objectData.Position.ToFloat3());
-
 					var inventoryOverride = new CustomScenesDataTable.InventoryOverride();
 					if (objectData.Properties.Inventory is { Count: > 0 } && prefab.TryGetComponent<InventoryAuthoring>(out var inventoryAuthoring)) {
-						inventoryOverride.itemsOverride = new List<global::ObjectData>();
+						inventoryOverride.itemsOverride = new List<InitialInventoryItem>();
 						inventoryOverride.itemsToRemove = inventoryAuthoring.itemsInInventory.Count;
 
 						var itemsBySlot = objectData.Properties.Inventory
@@ -220,13 +223,15 @@ namespace SceneBuilder.Structures {
 
 						for (var i = 0; i <= highestSlotIndex; i++) {
 							if (itemsBySlot.TryGetValue(i, out var inventoryItem)) {
-								inventoryOverride.itemsOverride.Add(new global::ObjectData {
-									objectID = API.Authoring.GetObjectID(inventoryItem.Id),
-									variation = inventoryItem.Variation,
-									amount = inventoryItem.Amount
+								inventoryOverride.itemsOverride.Add(new InitialInventoryItem {
+									item = new global::ObjectData {
+										objectID = API.Authoring.GetObjectID(inventoryItem.Id),
+										variation = inventoryItem.Variation,
+										amount = inventoryItem.Amount	
+									}
 								});
 							} else {
-								inventoryOverride.itemsOverride.Add(new global::ObjectData());
+								inventoryOverride.itemsOverride.Add(new InitialInventoryItem());
 							}
 						}
 					}
@@ -238,8 +243,12 @@ namespace SceneBuilder.Structures {
 
 					inventoryOverride.hasAnyInventoryOverride = true;
 					inventoryOverride.hasItemsOverride = true;
-					inventoryOverride.itemsOverride ??= new List<global::ObjectData>();
-
+					inventoryOverride.itemsOverride ??= new List<InitialInventoryItem>();
+					
+					prefabs.Add(prefab);
+					prefabPositions.Add(objectData.Position.ToFloat3());
+					prefabColors.Add(objectData.Properties.Color != null ? new OptionalValue<PaintableColor>(objectData.Properties.Color.Value) : default);
+					prefabDirections.Add(objectData.Properties.Direction != null ? new OptionalValue<float3>(objectData.Properties.Direction.Value) : default);
 					prefabInventoryOverrides.Add(inventoryOverride);
 				}
 			}
@@ -411,7 +420,7 @@ namespace SceneBuilder.Structures {
 						properties.Description = text;
 				}
 
-				if (EntityUtility.TryGetComponentData<GrowingCD>(entity, world, out var growingData))
+				if (EntityUtility.TryGetComponentData<GrowingCD>(entity, world, out var growingData) && growingData.currentStage > 0)
 					properties.GrowthStage = growingData.currentStage;
 
 				if (EntityUtility.TryGetBuffer<ContainedObjectsBuffer>(entity, world, out var containedObjects)) {

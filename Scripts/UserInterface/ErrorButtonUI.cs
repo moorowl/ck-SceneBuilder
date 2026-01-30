@@ -11,7 +11,7 @@ namespace SceneBuilder.UserInterface {
 
 		public void AddError(string term) {
 			_errors.Add(new TextAndFormatFields {
-				text = "SceneBuilder:ErrorFormat",
+				text = "SceneBuilder-General/ErrorFormat",
 				formatFields = new[] {
 					term
 				},

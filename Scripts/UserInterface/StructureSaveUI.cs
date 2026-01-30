@@ -50,19 +50,19 @@ namespace SceneBuilder.UserInterface {
 			saveButton.ClearErrors();
 
 			if (string.IsNullOrWhiteSpace(textInput.GetInputText()))
-				saveButton.AddError("SceneBuilder:SaveToolUI/ErrorNoName");
+				saveButton.AddError("SceneBuilder-SaveToolUI/ErrorNoName");
 
 			var frameSize = StructureUI.FrameUI.Size.RoundToInt().ToInt2();
 			if (math.cmax(frameSize) > Constants.MaxSceneSize)
-				saveButton.AddError("SceneBuilder:SaveToolUI/ErrorAreaTooBig");
+				saveButton.AddError("SceneBuilder-SaveToolUI/ErrorAreaTooBig");
 
 			if (Manager.main.player != null) {
 				var frameCenter = StructureUI.FrameUI.Center.RoundToInt().ToInt2();
 				if (math.distance(frameCenter, Manager.main.player.GetEntityPosition().RoundToInt2()) > Constants.MaxSceneSize * 2)
-					saveButton.AddError("SceneBuilder:SaveToolUI/ErrorTooFarAway");
+					saveButton.AddError("SceneBuilder-SaveToolUI/ErrorTooFarAway");
 			}
 
-			statusText.Render(PugText.ProcessText("SceneBuilder:SaveToolUI/Dimensions", new[] {
+			statusText.Render(PugText.ProcessText("SceneBuilder-SaveToolUI/Dimensions", new[] {
 				frameSize.x.ToString(),
 				frameSize.y.ToString()
 			}, true, false));

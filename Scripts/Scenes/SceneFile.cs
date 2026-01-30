@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Pug.UnityExtensions;
 using SceneBuilder.Structures;
 using SceneBuilder.Utilities.DataStructures;
 using Unity.Mathematics;
@@ -67,7 +68,7 @@ namespace SceneBuilder.Scenes {
 
 		public CustomScenesDataTable.Scene ConvertToDataTableScene(Identifier id, StructureFile structureFile, int sceneIndex) {
 			StructureFile.Converter.GetMaps(structureFile, out var maps, out var smallestTilePosition, out var largestTilePosition);
-			StructureFile.Converter.GetPrefabs(structureFile, sceneIndex, out var prefabs, out var prefabPositions, out var prefabInventoryOverrides);
+			StructureFile.Converter.GetPrefabs(structureFile, sceneIndex, out var prefabs, out var prefabPositions, out var prefabInventoryOverrides, out var prefabColors, out var prefabDirections);
 
 			var boundsSize = new int2(math.abs(smallestTilePosition.x) + math.abs(largestTilePosition.x), math.abs(smallestTilePosition.y) + math.abs(largestTilePosition.y));
 			var supportsFlip = Generation.Dungeon == null;
@@ -75,7 +76,7 @@ namespace SceneBuilder.Scenes {
 			return new CustomScenesDataTable.Scene {
 				sceneName = SceneLoader.GetRuntimeName(id),
 				maxOccurrences = Generation.Random?.MaxOccurrences ?? 0,
-				replacedByContentBundle = new OptionalValue<ContentBundleID>(),
+				replacedByContentBundle = new OptionalValue<DataBlockRef<ContentBundleDataBlock>>(),
 				biomesToSpawnIn = new WorldGenerationTypeDependentValue<List<Biome>> {
 					classic = new List<Biome>(),
 					fullRelease = Generation.Random?.BiomesToSpawnIn ?? new List<Biome>()
@@ -90,7 +91,9 @@ namespace SceneBuilder.Scenes {
 				maps = maps,
 				prefabs = prefabs,
 				prefabPositions = prefabPositions,
-				prefabInventoryOverrides = prefabInventoryOverrides
+				prefabInventoryOverrides = prefabInventoryOverrides,
+				prefabColors = prefabColors,
+				prefabDirections = prefabDirections
 			};
 		}
 	}

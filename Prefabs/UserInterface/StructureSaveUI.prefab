@@ -41,7 +41,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 320110022212898267}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 1873953792, guid: 3519ac58e5ff54941a4a69512016923c, type: 3}
+  m_Script: {fileID: 1873953792, guid: 548e3dd2d27c1e2d0bdf82f0889cb8a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   centerInParent: 1
@@ -130,7 +130,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 592598295530374558}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 1873953792, guid: 3519ac58e5ff54941a4a69512016923c, type: 3}
+  m_Script: {fileID: 1873953792, guid: 548e3dd2d27c1e2d0bdf82f0889cb8a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   centerInParent: 0
@@ -227,6 +227,9 @@ SpriteRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -304,7 +307,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1141633159385185155}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: -1087151945, guid: 3519ac58e5ff54941a4a69512016923c, type: 3}
+  m_Script: {fileID: -1087151945, guid: 548e3dd2d27c1e2d0bdf82f0889cb8a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   sr: {fileID: 2399051446092318056}
@@ -325,6 +328,9 @@ SpriteRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -403,7 +409,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1172512330292287522}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: -685432232, guid: 3519ac58e5ff54941a4a69512016923c, type: 3}
+  m_Script: {fileID: -685432232, guid: 548e3dd2d27c1e2d0bdf82f0889cb8a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   topUIElements: []
@@ -428,7 +434,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1172512330292287522}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: -1430991550, guid: 3519ac58e5ff54941a4a69512016923c, type: 3}
+  m_Script: {fileID: -1430991550, guid: 548e3dd2d27c1e2d0bdf82f0889cb8a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   showCraftingBuildingText: 0
@@ -496,6 +502,9 @@ SpriteRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -561,7 +570,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1767587343209881570}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: -685432232, guid: 3519ac58e5ff54941a4a69512016923c, type: 3}
+  m_Script: {fileID: -685432232, guid: 548e3dd2d27c1e2d0bdf82f0889cb8a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   topUIElements: []
@@ -618,7 +627,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 2160654962540544943}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 1873953792, guid: 3519ac58e5ff54941a4a69512016923c, type: 3}
+  m_Script: {fileID: 1873953792, guid: 548e3dd2d27c1e2d0bdf82f0889cb8a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   centerInParent: 0
@@ -711,7 +720,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 2253719861156102717}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: -1748679033, guid: 3519ac58e5ff54941a4a69512016923c, type: 3}
+  m_Script: {fileID: 11500000, guid: 38bf5347987a45d38c4d732d0d5a542a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   topUIElements: []
@@ -849,6 +858,9 @@ SpriteRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -925,7 +937,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 4132521478393921590}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 1873953792, guid: 3519ac58e5ff54941a4a69512016923c, type: 3}
+  m_Script: {fileID: 1873953792, guid: 548e3dd2d27c1e2d0bdf82f0889cb8a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   centerInParent: 0
@@ -1191,6 +1203,9 @@ SpriteRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -1275,6 +1290,9 @@ SpriteRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -1351,7 +1369,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 5976785589775029304}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 1873953792, guid: 3519ac58e5ff54941a4a69512016923c, type: 3}
+  m_Script: {fileID: 1873953792, guid: 548e3dd2d27c1e2d0bdf82f0889cb8a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   centerInParent: 1
@@ -1440,7 +1458,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 6228319082507385649}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 1873953792, guid: 3519ac58e5ff54941a4a69512016923c, type: 3}
+  m_Script: {fileID: 1873953792, guid: 548e3dd2d27c1e2d0bdf82f0889cb8a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   centerInParent: 0
@@ -1460,7 +1478,7 @@ MonoBehaviour:
   dontResetEffectsOnRender: 0
   hideInStreamerMode: 0
   maxWidth: 7
-  textString: SceneBuilder:SaveToolUI/Title
+  textString: SceneBuilder-SaveToolUI/Title
   textSuffix: 
   formatFields: []
   overrideMaterial: {fileID: 0}
@@ -1537,6 +1555,9 @@ SpriteRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -1621,6 +1642,9 @@ SpriteRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -1703,7 +1727,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 7584727517915010463}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: -93948443, guid: 3519ac58e5ff54941a4a69512016923c, type: 3}
+  m_Script: {fileID: -93948443, guid: 548e3dd2d27c1e2d0bdf82f0889cb8a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   topUIElements: []
@@ -1797,7 +1821,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 7864394355439444344}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 1873953792, guid: 3519ac58e5ff54941a4a69512016923c, type: 3}
+  m_Script: {fileID: 1873953792, guid: 548e3dd2d27c1e2d0bdf82f0889cb8a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   centerInParent: 0
@@ -1894,6 +1918,9 @@ SpriteRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -2017,6 +2044,9 @@ SpriteRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -2082,7 +2112,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 8687946466953738669}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: -685432232, guid: 3519ac58e5ff54941a4a69512016923c, type: 3}
+  m_Script: {fileID: -685432232, guid: 548e3dd2d27c1e2d0bdf82f0889cb8a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   topUIElements: []

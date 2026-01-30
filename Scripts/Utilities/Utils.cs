@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using Pug.UnityExtensions;
 using PugMod;
-using PugProperties;
+using Pug.Properties;
 using SceneBuilder.Scenes;
 using SceneBuilder.Utilities.DataStructures;
 using Unity.Collections;
@@ -120,91 +121,7 @@ namespace SceneBuilder.Utilities {
 
 			return variation > 0 && TryFindMatchingPrefab(id, 0, out prefab);
 		}
-
-		public static void ApplySceneObjectProperties(EntityCommandBuffer ecb, Entity entity, Entity authoringEntity, ObjectDataCD authoringObjectData, ref SceneObjectPropertiesBlob properties, int prefabIndex, int2 flipDirection, ComponentLookup<DirectionBasedOnVariationCD> directionBasedOnVariationLookup, ComponentLookup<DirectionCD> directionLookup, ComponentLookup<PaintableObjectCD> paintableObjectLookup, ComponentLookup<DropsLootFromLootTableCD> dropsLootFromTableLookup, BufferLookup<DescriptionBuffer> descriptionLookup, ComponentLookup<GrowingCD> growingLookup, ComponentLookup<ObjectPropertiesCD> objectPropertiesLookup) {
-			ref var prefabVariation = ref properties.PrefabVariations[prefabIndex];
-			ref var prefabAmount = ref properties.PrefabAmounts[prefabIndex];
-			ref var prefabDirection = ref properties.PrefabDirections[prefabIndex];
-			ref var prefabColor = ref properties.PrefabColors[prefabIndex];
-			ref var prefabDescription = ref properties.PrefabDescriptions[prefabIndex];
-			ref var prefabGrowthStage = ref properties.PrefabGrowthStages[prefabIndex];
-			ref var prefabDropsLootTable = ref properties.PrefabDropsLootTable[prefabIndex];
-
-			if (!objectPropertiesLookup.TryGetComponent(authoringEntity, out var objectPropertiesCD))
-				return;
-
-			var variationOverride = prefabVariation;
-
-			if (directionBasedOnVariationLookup.HasComponent(authoringEntity)) {
-				variationOverride = DirectionBasedOnVariationCD.GetFlippedVariation(variationOverride, flipDirection.x == -1, flipDirection.y == -1);
-			} else if (objectPropertiesCD.Has(PropertyID.PlaceableObject.hasVariationsThatCanBePlacedOnWalls)) {
-				var wallVariationsStartIndex = objectPropertiesCD.Has(PropertyID.PlaceableObject.wallSideVariationStartsOnIndex1) ? 1 : 0;
-				// objects with wallSideVariationStartsOnIndex1 use variation 0 as a standing state
-				if (variationOverride >= wallVariationsStartIndex)
-					variationOverride = GetFlippedWallObjectVariation(variationOverride - wallVariationsStartIndex, flipDirection.x == -1, flipDirection.y == -1) + wallVariationsStartIndex;
-			} else if (directionLookup.HasComponent(authoringEntity)) {
-				ecb.SetComponent(entity, new DirectionCD {
-					direction = new float3(prefabDirection.x * flipDirection.x, prefabDirection.y, prefabDirection.z * flipDirection.y)
-				});
-			}
-			
-			if (variationOverride != authoringObjectData.variation || prefabAmount != authoringObjectData.amount) {
-				authoringObjectData.variation = variationOverride;
-				authoringObjectData.amount = prefabAmount;
-				ecb.SetComponent(entity, authoringObjectData);
-			}
-
-			if (paintableObjectLookup.HasComponent(authoringEntity)) {
-				ecb.SetComponent(entity, new PaintableObjectCD {
-					color = prefabColor
-				});
-			}
-
-			if (descriptionLookup.HasBuffer(authoringEntity)) {
-				var buffer = ecb.SetBuffer<DescriptionBuffer>(entity);
-				for (var i = 0; i < prefabDescription.Length; i++) {
-					buffer.Add(new DescriptionBuffer {
-						Value = prefabDescription[i]
-					});
-				}
-			}
-			
-			if (growingLookup.TryGetComponent(authoringEntity, out var existingGrowingCD)) {
-				// Default to highest stage if one isn't specified
-				existingGrowingCD.currentStage = prefabGrowthStage == -1 && objectPropertiesCD.TryGet<int>(PropertyID.Growing.highestStage, out var highestStage)
-					? highestStage
-					: prefabGrowthStage;
-				ecb.SetComponent(entity, existingGrowingCD);
-			}
-
-			if (dropsLootFromTableLookup.HasComponent(authoringEntity) && (int) prefabDropsLootTable > -1) {
-				ecb.SetComponent(entity, new DropsLootFromLootTableCD {
-					lootTableID = prefabDropsLootTable
-				});
-			}
-		}
-
-		private static int GetFlippedWallObjectVariation(int variation, bool flippedX, bool flippedY) {
-			const int backVariation = 0;
-			const int rightVariation = 1;
-			const int frontVariation = 2;
-			const int leftVariation = 3;
-			
-			if (flippedY && variation == backVariation)
-				return frontVariation;
-
-			if (flippedX && variation == rightVariation)
-				return leftVariation;
-
-			if (flippedY && variation == frontVariation)
-				return backVariation;
-
-			if (flippedX && variation == leftVariation)
-				return rightVariation;
-
-			return variation;
-		}
-
+		
 		public static List<(ObjectDataCD ObjectData, float3 Position, Entity Entity)> ObjectQuery(CollisionWorld collisionWorld, World ecsWorld, int2 position, int2 size) {
 			var objects = new List<(ObjectDataCD ObjectData, float3 Position, Entity Entity)>();
 			var entitiesAdded = new HashSet<Entity>();

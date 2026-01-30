@@ -15,7 +15,8 @@
         "Unity.Physics.Hybrid",
         "Unity.Properties",
         "Unity.Transforms",
-        "PugMod.SDK"
+        "PugMod.SDK",
+        "Unity.NetCode.Authoring.Hybrid"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -140,7 +141,8 @@
         "WorldPatcher.dll",
         "XblPCSandbox.dll",
         "ZipSaveFolder.dll",
-        "0Harmony.dll"
+        "0Harmony.dll",
+        "ScriptableData.dll"
     ],
     "autoReferenced": false,
     "defineConstraints": [],

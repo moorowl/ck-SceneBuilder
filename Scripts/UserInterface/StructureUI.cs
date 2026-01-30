@@ -82,10 +82,10 @@ namespace SceneBuilder.UserInterface {
 							FrameUI.PinA = mouseTilePosition;
 							FrameUI.PinB = null;
 							_isSelectingPinB = true;
-							Utils.SendLocalChatMessage(LocalizationManager.GetTranslation("SceneBuilder:FirstPointSet"));
+							Utils.SendLocalChatMessage(LocalizationManager.GetTranslation("SceneBuilder-General/FirstPointSet"));
 						} else {
 							_isSelectingPinB = false;
-							Utils.SendLocalChatMessage(LocalizationManager.GetTranslation("SceneBuilder:SecondPointSet"));
+							Utils.SendLocalChatMessage(LocalizationManager.GetTranslation("SceneBuilder-General/SecondPointSet"));
 						}
 					}
 
@@ -96,7 +96,7 @@ namespace SceneBuilder.UserInterface {
 
 						SaveUI.Show(structureName => {
 							Main.StructureRequestClientSystem.SaveStructure(structureName, position, size);
-							Utils.SendLocalChatMessage(string.Format(LocalizationManager.GetTranslation("SceneBuilder:SavedAs"), structureName));
+							Utils.SendLocalChatMessage(string.Format(LocalizationManager.GetTranslation("SceneBuilder-General/SavedAs"), structureName));
 						});
 					}
 				}

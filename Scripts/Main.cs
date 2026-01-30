@@ -1,10 +1,13 @@
 ﻿using System.Linq;
 using HarmonyLib;
+using Pug.UnityExtensions;
 using PugMod;
+using PugWorldGen;
 using SceneBuilder.Networking;
 using SceneBuilder.Objects;
 using SceneBuilder.Scenes;
 using SceneBuilder.Structures;
+using SceneBuilder.Utilities.DataStructures;
 using UnityEngine;
 
 // ReSharper disable InconsistentNaming
@@ -19,6 +22,9 @@ namespace SceneBuilder {
 			API.Client.OnWorldCreated += () => {
 				StructureRequestClientSystem = API.Client.World.GetOrCreateSystemManaged<StructureRequestClientSystem>();
 			};
+			API.Server.OnWorldCreated += () => {
+				API.Server.World.GetExistingSystemManaged<ApplySpawnedCustomSceneSystem>().Enabled = false;
+			};
 		}
 
 		public void Init() {
@@ -28,6 +34,8 @@ namespace SceneBuilder {
 			var gameObject = new GameObject(Constants.InternalName);
 			Object.DontDestroyOnLoad(gameObject);
 			Object.Instantiate(assetBundle.LoadAsset<GameObject>(Constants.StructureUiPrefabPath), gameObject.transform);
+			
+			BurstDisabler.DisableBurstForSystem<DungeonApplySpawnedObjectsSystem>();
 		}
 
 		public void Shutdown() { }
@@ -35,6 +43,9 @@ namespace SceneBuilder {
 		public void ModObjectLoaded(Object obj) {
 			if (obj is GameObject gameObject && gameObject.TryGetComponent<PooledGraphicalObject>(out var pooledGraphicalObject))
 				PooledGraphicalObjectConverter.Register(pooledGraphicalObject);
+			
+			if (obj is TextDataBlock textDataBlock)
+				textDataBlock.name = textDataBlock.name.Replace("-", ":");
 		}
 
 		public void Update() { }

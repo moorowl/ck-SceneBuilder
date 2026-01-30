@@ -2,14 +2,14 @@
 using HarmonyLib;
 using Interaction;
 using Pug.ECS.Hybrid;
-using PugConversion;
+using Pug.Conversion;
 using Unity.Mathematics;
 using UnityEngine;
 
 // ReSharper disable InconsistentNaming
 
 namespace SceneBuilder.Objects {
-	public class PooledGraphicalObjectConverter : PugConverter {
+	public class PooledGraphicalObjectConverter : Converter {
 		private static readonly List<PoolablePrefabBank.PoolablePrefab> PoolablePrefabs = new();
 
 		public static void Register(PooledGraphicalObject pooledGraphicalObject) {

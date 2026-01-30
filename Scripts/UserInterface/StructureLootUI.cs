@@ -57,7 +57,7 @@ namespace SceneBuilder.UserInterface {
 			applyButton.ClearErrors();
 
 			if (!TryGetLootTable(inventoryLootTableTextInput, out _) || !TryGetLootTable(dropLootTableTextInput, out _))
-				applyButton.AddError("SceneBuilder:LootToolUI/ErrorUnknownLootTable");
+				applyButton.AddError("SceneBuilder-LootToolUI/ErrorUnknownLootTable");
 		}
 
 		private bool TryGetLootTable(TextInputField textInput, out LootTableID lootTable) {
