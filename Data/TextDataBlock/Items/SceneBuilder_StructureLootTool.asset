@@ -9,16 +9,16 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 2108018792, guid: d00b036db31ed324f99d4111c393f019, type: 3}
-  m_Name: SceneBuilder-StructureVoid
+  m_Script: {fileID: 2108018792, guid: e853a5af7d19630282ad0af7b5dabadc, type: 3}
+  m_Name: SceneBuilder_StructureLootTool
   m_EditorClassIdentifier: 
   m_overload:
     m_address:
       m_low: 0
       m_high: 0
   m_address:
-    m_low: 7274467960520075630
-    m_high: -7081102984033992695
+    m_low: -3110766161879527899
+    m_high: 4923554001893166779
   m_dynamicCollections:
     m_list: []
   m_localizedTexts:
@@ -66,8 +66,8 @@ MonoBehaviour:
         m_address:
           m_low: 681352171529052915
           m_high: 2314507893210082619
-      title: Structure Void
-      description: Place on tile columns that shouldn't be included in a saved structure.
+      title: Structure Loot Tool
+      description: Used to set loot tables for objects.
     - m_language:
         m_address:
           m_low: 6040640903323332866
@@ -134,8 +134,8 @@ MonoBehaviour:
       m_address:
         m_low: 681352171529052915
         m_high: 2314507893210082619
-    title: Structure Void
-    description: Place on tile columns that shouldn't be included in a saved structure.
+    title: Structure Loot Tool
+    description: Used to set loot tables for objects.
   m_shouldBeLocalized: 1
   m_header: Items
   references:

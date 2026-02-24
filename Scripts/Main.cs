@@ -23,7 +23,7 @@ namespace SceneBuilder {
 				StructureRequestClientSystem = API.Client.World.GetOrCreateSystemManaged<StructureRequestClientSystem>();
 			};
 			API.Server.OnWorldCreated += () => {
-				API.Server.World.GetExistingSystemManaged<ApplySpawnedCustomSceneSystem>().Enabled = false;
+				API.Server.World.GetExistingSystemManaged<SbApplySpawnedCustomSceneSystem>().Enabled = false;
 			};
 		}
 
@@ -36,6 +36,7 @@ namespace SceneBuilder {
 			Object.Instantiate(assetBundle.LoadAsset<GameObject>(Constants.StructureUiPrefabPath), gameObject.transform);
 			
 			BurstDisabler.DisableBurstForSystem<DungeonApplySpawnedObjectsSystem>();
+			BurstDisabler.DisableBurstForSystem<ApplySpawnedCustomSceneSystem>();
 		}
 
 		public void Shutdown() { }
@@ -43,12 +44,13 @@ namespace SceneBuilder {
 		public void ModObjectLoaded(Object obj) {
 			if (obj is GameObject gameObject && gameObject.TryGetComponent<PooledGraphicalObject>(out var pooledGraphicalObject))
 				PooledGraphicalObjectConverter.Register(pooledGraphicalObject);
-			
-			if (obj is TextDataBlock textDataBlock)
-				textDataBlock.name = textDataBlock.name.Replace("-", ":");
 		}
 
-		public void Update() { }
+		public void Update() {
+			if (Input.GetKeyDown(KeyCode.F8)) {
+				StructureRequestClientSystem.PlaceScene(new Identifier("MoreScenes", "Desert/DodoIsland"), Manager.main.player.WorldPosition.RoundToInt2());
+			}
+		}
 
 		[HarmonyPatch]
 		public static class Patches {
