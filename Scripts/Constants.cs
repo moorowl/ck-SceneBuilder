@@ -1,6 +1,6 @@
 ﻿namespace SceneBuilder {
 	public static class Constants {
-		public const string Version = "1.0.1";
+		public const string Version = "1.1";
 		public const string InternalName = "SceneBuilder";
 		public const string FriendlyName = "SceneBuilder";
 
